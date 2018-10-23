@@ -1,0 +1,101 @@
+<!--
+  Generated template for the MakeGiftPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Send a Gift</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+
+  <p style="text-align: center;">
+    <b>Step 1/4: Details</b><br>
+    First we need a few details: {{ usersName.length==0 || recipientsName.length==0 ? '' : '✅' }}
+  </p>
+  <ion-card class="limit-width">
+    <ion-list>
+      <ion-item>
+        <ion-label stacked>Your name</ion-label>
+        <ion-input type="text" [(ngModel)]="usersName"></ion-input>
+      </ion-item>
+      <ion-item>
+        <ion-label stacked>Recipients name</ion-label>
+        <ion-input type="text" [(ngModel)]="recipientsName"></ion-input>
+      </ion-item>
+    </ion-list>
+  </ion-card>
+
+  <p style="text-align: center;">
+    <b>Step 2/4: Link</b><br>
+    Lets link your physical gift to this digital gift. {{ content_data.length==0 ? '' : '✅' }}
+  </p>
+  
+  <ion-card *ngFor="let item of content_data">
+    <ion-item>
+        <ion-avatar item-start>
+      <img item-start style="border-radius: 0%;" *ngIf="item['connection_type'] == 'qrcode'"  src="assets/imgs/example-qrcode.png"/>
+      <img item-start style="border-radius: 0%;" *ngIf="item['connection_type'] == 'artcode'" src="assets/imgs/example-artcode.png"/>
+      <img item-start style="border-radius: 0%;" *ngIf="item['connection_type'] == 'nfc'"     src="assets/imgs/example-nfc.png"/>
+      </ion-avatar>
+      {{ item['connection_type'] == 'qrcode' ? 'QR code' : (item['connection_type'] == 'nfc' ? 'NFC tag' : 'Artcode '+getArtcodeCodeFromUri(item['connection_uri']) ) }}
+      <button ion-button outline item-end>
+          Remove
+        </button>
+    </ion-item>
+    <ion-item>
+      <p style="text-align: center;" ion-item>
+        <b>Step 3/4: Add content</b><br>
+        Add some digital content. {{ item['content_items'].length==0 ? '' : '✅' }}
+      </p>
+    </ion-item>
+      <ion-item *ngFor="let content_item of item['content_items']">
+          <img *ngIf="content_item['content_type'] == 'photo'" src="{{ content_item['local_content_uri'] }}"/>
+          <p *ngIf="content_item['content_type'] == 'text'" >{{ content_item['data'] }}</p>
+      </ion-item>
+    <ion-list>
+      <p style="text-align: center;" ion-item *ngIf="item['content_items'].length != 0">
+        <b>Optional: Add more content</b>
+      </p>
+      <button ion-item detail-none (click)="addContent()">
+        Add text
+        <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+      </button>
+      <button ion-item detail-none (click)="addContent()">
+        Add photo
+        <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+      </button>
+    </ion-list>
+  </ion-card>
+
+  <p style="text-align: center;" *ngIf="content_data.length != 0">
+    <b>Optional: Link another</b><br>
+    You can have multiple links between the physical and digital pointing to different content.
+  </p>
+
+  <ion-card class="limit-width">
+    <ion-list>
+      <button ion-item detail-none (click)="addContent()">
+        {{ content_data.length == 0 ? 'Link to your physical gift' : 'Add another link to your physical gift' }}
+        <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+      </button>
+    </ion-list>
+  </ion-card>
+
+  <p style="text-align: center;" *ngIf="content_data.length != 0"><b>Step 4/4: Save</b></p>
+
+  <ion-card *ngIf="content_data.length != 0" class="limit-width">
+      <button ion-item detail-none (click)="addContent()">
+        Save &amp; send
+        <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+      </button>
+  </ion-card>
+
+
+</ion-content>

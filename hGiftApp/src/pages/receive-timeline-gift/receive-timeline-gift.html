@@ -1,0 +1,82 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Gift</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+<ion-content padding>
+
+  <ng-container *ngFor="let entry of timelineEntries">
+    <ion-card *ngIf="entry.getMetadata('hg_entry_type') == 'reveal'">
+      <!-- Header -->
+      <ion-item>
+        <ion-avatar item-start>
+          <img item-start style="border-radius: 0%;" *ngIf="entry.getMetadata('hg_link_type') == 'qrcode'"  src="assets/imgs/example-qrcode.png"/>
+          <img item-start style="border-radius: 0%;" *ngIf="entry.getMetadata('hg_link_type') == 'artcode'" src="assets/imgs/example-artcode.png"/>
+          <img item-start style="border-radius: 0%;" *ngIf="entry.getMetadata('hg_link_type') == 'nfc'"     src="assets/imgs/example-nfc.png"/>
+        </ion-avatar>
+        {{ entry.getMetadata('hg_link_type') == 'qrcode' ? 'QR code' : (entry.getMetadata('hg_link_type') == 'nfc' ? 'NFC tag' : 'Artcode '+getArtcodeCodeFromUri(entry.getMetadata('hg_link_uri')) ) }}
+      </ion-item>
+
+      <!-- Content -->
+      <ng-container *ngFor="let contentEntry of timelineEntries">
+        <ion-item *ngIf="contentEntry.getMetadata('hg_entry_type') != 'link' && contentEntry.getMetadata('hg_link_uri') == entry.getMetadata('hg_link_uri')">
+          <img *ngIf="contentEntry.getMetadata('hg_entry_type') == 'image'" src="{{ contentEntry.getLocalContentURI() }}"/>
+          <p   *ngIf="contentEntry.getMetadata('hg_entry_type') == 'text'" >{{ decodeBase64TextURI(contentEntry.getLocalContentURI()) }}</p>
+        </ion-item>
+      </ng-container>
+
+    </ion-card>
+  </ng-container>
+
+  <p style="text-align: center;" *ngIf="toRevealQRCodes+toRevealNFCTags+toRevealArtcodes > 0">Use the options below to access the hidden digital content in your gift!</p>
+  
+  <ion-card *ngIf="toRevealQRCodes > 0" class="limit-width" (tap)="scanQR()">
+    <ion-item>
+      <ion-avatar item-start>
+        <img item-start style="border-radius: 0%;" src="assets/imgs/example-qrcode.png"/>
+      </ion-avatar>
+      There are still QR codes to find in your gift.
+      <button ion-button clear small>
+        Scan using camera
+        <ion-icon name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+      </button>
+    </ion-item>
+  </ion-card>
+
+  <ion-card *ngIf="toRevealNFCTags > 0" class="limit-width" (tap)="startNFC()">
+    <ion-item>
+      <ion-avatar item-start>
+        <img item-start style="border-radius: 0%;" src="assets/imgs/example-nfc.png"/>
+      </ion-avatar>
+      There are still NFC tags to find in your gift.
+      <button ion-button clear small>
+        Start NFC
+        <ion-icon name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+      </button>
+    </ion-item>
+  </ion-card>
+
+  <ion-card *ngIf="toRevealArtcodes > 0" class="limit-width" (tap)="scanArtcode()">
+    <ion-item>
+      <ion-avatar item-start>
+        <img item-start style="border-radius: 0%;" src="assets/imgs/example-artcode.png"/>
+      </ion-avatar>
+      There are still Artcodes to find in your gift.
+      <button ion-button clear small>
+        Scan using camera
+        <ion-icon name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+      </button>
+    </ion-item>
+  </ion-card>
+
+  <ion-card *ngIf="toRevealQRCodes == 0 && toRevealNFCTags == 0 && toRevealArtcodes == 0" class="limit-width">
+    <button ion-item detail-none (tap)="send()">
+      Send thank you note
+      <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+    </button>
+  </ion-card>
+
+</ion-content>

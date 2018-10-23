@@ -1,0 +1,94 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+        Hybrid Gifting
+    </ion-title>
+    <ion-buttons end>
+      <button ion-button (click)="signin()">
+        Login
+      </button>
+    </ion-buttons>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding class="card-background-page">
+  <h1>Hybrid Gifting</h1>
+  <p>You can use this app to send and receive hybrid gifts – physical gifts with digital content.</p>
+
+  <ion-card>
+    <div class="card-headline" (tap)="sendGift()">
+      <img src="assets/imgs/gift-send.jpg"/>
+      <div class="image-gradient-cover image-gradient-cover-give"></div>
+      <div class="headline-content">
+        <div class="card-title">Send a gift</div>
+        <div class="card-subtitle"></div>
+      </div>
+      <button ion-button clear small color="light">
+        Assign digital content
+        <ion-icon name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+      </button>
+    </div>
+    <ion-list>
+      <ion-item *ngIf="sent.length != 0" style="white-space: normal;">
+        Gifts you have made:
+      </ion-item>
+      <ion-item-sliding *ngFor="let item of sent">
+        <button ion-item detail-none  (tap)="openSentGift(item)">
+          Gift #{{ item.getTimelineID() }}
+          <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+        </button>
+        <ion-item-options side="right">
+          <button ion-button color="danger" (tap)="deleteGift(item)">
+            <ion-icon name="remove-circle"></ion-icon>
+            Delete
+          </button>
+          <button ion-button color="default" (tap)="debugAddGiftToReceived(item)">
+            <ion-icon name="bug"></ion-icon>
+            MOVE
+          </button>
+          <button ion-button color="default" (tap)="debugDeleteFromSentList(item)">
+            <ion-icon name="bug"></ion-icon>
+            Delete from list
+          </button>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+  </ion-card>
+
+  <ion-card>
+    <div class="card-headline" (tap)="receiveGift()">
+      <img src="assets/imgs/gift-receive.jpg"/>
+      <div class="image-gradient-cover image-gradient-cover-receive"></div>
+      <div class="headline-content">
+        <div class="card-title">Receive a gift</div>
+        <div class="card-subtitle">Received a gift? Access its digital content here!</div>
+      </div>
+      <button ion-button clear small color="light">
+        Access digital content 
+        <ion-icon name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+      </button>
+    </div>
+    <ion-list>
+      <ion-item *ngIf="received.length != 0" style="white-space: normal;">
+        Gifts you have previously received:
+      </ion-item>
+      <ion-item-sliding *ngFor="let item of received">
+        <button ion-item detail-none (tap)="openReceiveGift(item)">
+          Gift #{{ item.getTimelineID() }}
+          <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+        </button>
+        <ion-item-options side="right">
+          <button ion-button color="danger" (tap)="deleteGift(item)">
+            <ion-icon name="remove-circle"></ion-icon>
+            Delete
+          </button>
+          <button ion-button color="default" (tap)="debugDeleteFromReceivedList(item)">
+            <ion-icon name="bug"></ion-icon>
+            Delete from list
+          </button>
+        </ion-item-options>
+      </ion-item-sliding>
+    </ion-list>
+  </ion-card>
+
+</ion-content>

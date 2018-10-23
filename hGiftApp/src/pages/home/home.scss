@@ -1,0 +1,86 @@
+page-home {
+
+
+
+    div.card-headline {
+        position: relative;
+    }
+
+    div.card-headline img {
+        position: relative;
+    }
+    div.card-headline .headline-content .card-title {
+        font-size: 150%;
+    }
+
+
+    /*
+    div.card-headline .card-subtitle {
+        position: absolute;
+        top: 0em;
+        left: 0em;
+        margin: 0.5em;
+    }
+    */
+
+    .headline-content {
+        position: absolute;
+        top: 0em;
+        left: 0em;
+        margin: 0.7em;
+        color: white;
+    }
+
+    div.card-headline button {
+        position: absolute;
+        bottom: 0.4em;
+        right: 0.4em;
+    }
+
+    .image-gradient-cover {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 100%;
+    }
+    .image-gradient-cover-receive {
+/* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#abc370+0,abc370+100&1+0,0.5+50,1+100 */
+background: -moz-linear-gradient(-45deg, rgba(171,195,112,1) 0%, rgba(171,195,112,0.5) 50%, rgba(171,195,112,1) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(-45deg, rgba(171,195,112,1) 0%,rgba(171,195,112,0.5) 50%,rgba(171,195,112,1) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(135deg, rgba(171,195,112,1) 0%,rgba(171,195,112,0.5) 50%,rgba(171,195,112,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#abc370', endColorstr='#abc370',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+    }
+    .image-gradient-cover-give {
+        /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#f8a65f+0,f8a65f+100&1+0,0.5+50,1+100 */
+background: -moz-linear-gradient(-45deg, rgba(248,166,95,1) 0%, rgba(248,166,95,0.5) 50%, rgba(248,166,95,1) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(-45deg, rgba(248,166,95,1) 0%,rgba(248,166,95,0.5) 50%,rgba(248,166,95,1) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(135deg, rgba(248,166,95,1) 0%,rgba(248,166,95,0.5) 50%,rgba(248,166,95,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f8a65f', endColorstr='#f8a65f',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+    }
+
+    .label { white-space: normal; }
+    
+}
+
+ion-content.content {
+    background-attachment: fixed;
+    /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#3f4c6b+0,305099+50,3f4c6b+100 */
+background: rgb(63,76,107); /* Old browsers */
+background: -moz-linear-gradient(-45deg, rgba(63,76,107,1) 0%, rgba(48,80,153,1) 50%, rgba(63,76,107,1) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(-45deg, rgba(63,76,107,1) 0%,rgba(48,80,153,1) 50%,rgba(63,76,107,1) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(135deg, rgba(63,76,107,1) 0%,rgba(48,80,153,1) 50%,rgba(63,76,107,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+}
+
+ion-content.content div.scroll-content > h1, ion-content.content div.scroll-content > p {
+    color: white;
+}
+
+.label {white-space: normal;}
+
+
+ion-card.limit-width {
+    max-width: 360px;    
+    margin-right: auto;
+    margin-left: auto;
+}

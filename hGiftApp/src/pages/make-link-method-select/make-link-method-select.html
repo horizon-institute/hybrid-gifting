@@ -1,0 +1,72 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Add a Link</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+<ion-content padding>
+
+    <ion-card class="limit-width" (tap)="makeLinkQRCode()">
+      <!-- Start of vertical center wrapper --><table class="vertical-align-table-wrapper"><tr>
+        <td valign="middle" style="width:33%;">
+          <img src="assets/imgs/example-qrcode.png"/>
+        </td>
+        <td valign="middle" style="width:66%;">
+          <div class="card-title">
+            Add QR code
+          </div>
+          <div class="card-desc">
+            These are black and white square patterns that are scanned with the camera.
+            They work on all devices with a camera but you can't change the way they look.
+          </div>
+          <button ion-button clear small>
+            Scan using camera
+            <ion-icon name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+          </button>
+        </td>
+      <!-- End of vertical center wrapper --></tr></table>
+    </ion-card>
+    <ion-card class="limit-width" (tap)="makeLinkNFCTag()">
+        <!-- Start of vertical center wrapper --><table class="vertical-align-table-wrapper"><tr>
+          <td valign="middle" style="width:33%;">
+            <img src="assets/imgs/example-nfc.png"/>
+          </td>
+          <td valign="middle" style="width:66%;">
+            <div class="card-title">
+              Add NFC tag
+            </div>
+            <div class="card-desc">
+              These are contactless microchips similar to contantless bank or transport cards.
+              They only work on selected devices (some Android and iPhone 7 and newer).
+            </div>
+            <button ion-button clear small>
+                Start NFC
+              <ion-icon name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+            </button>
+          </td>
+        <!-- End of vertical center wrapper --></tr></table>
+    </ion-card>
+    <ion-card class="limit-width" (tap)="makeLinkArtcode()">
+        <!-- Start of vertical center wrapper --><table class="vertical-align-table-wrapper"><tr>
+          <td valign="middle" style="width:33%;">
+            <img src="assets/imgs/example-artcode.png"/>
+          </td>
+          <td valign="middle" style="width:66%;">
+            <div class="card-title">
+              Add Artcode
+            </div>
+            <div class="card-desc">
+              These are markers, scaned with the camera, you can draw yourself.
+              They work on any device with a camera and this app but require an e-mail with be sent with your gift.
+            </div>
+            <button ion-button clear small>
+                Scan using camera
+              <ion-icon name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+            </button>
+          </td>
+        <!-- End of vertical center wrapper --></tr></table>
+    </ion-card>
+
+</ion-content>
