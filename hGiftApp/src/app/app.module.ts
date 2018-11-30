@@ -20,8 +20,24 @@ import { MakeLinkMethodSelectPage } from '../pages/make-link-method-select/make-
 
 import { ReceiveTimelineGiftPage } from '../pages/receive-timeline-gift/receive-timeline-gift';
 
+import { QrCodeScannerPage } from '../pages/qr-code-scanner/qr-code-scanner';
+
 import { UserIdProvider } from '../providers/user-id/user-id';
 import { TimelineProvider } from '../providers/timeline/timeline';
+
+
+import { ImagePicker } from '@ionic-native/image-picker';
+import { NFC, Ndef } from '@ionic-native/nfc';
+import { QRScanner } from '@ionic-native/qr-scanner';
+import { HybridHttpProvider } from '../providers/hybrid-http/hybrid-http';
+
+import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { HTTP } from '@ionic-native/http';
+
+import { File } from '@ionic-native/file';
+
+import { InAppBrowser } from '@ionic-native/in-app-browser';
+import { ImageEntryViewPage } from '../pages/image-entry-view/image-entry-view';
 
 @NgModule({
   declarations: [
@@ -32,10 +48,13 @@ import { TimelineProvider } from '../providers/timeline/timeline';
     TimelineViewPage,
     MakeTimelineGiftPage,
     MakeLinkMethodSelectPage,
-    ReceiveTimelineGiftPage
+    ReceiveTimelineGiftPage,
+    QrCodeScannerPage,
+    ImageEntryViewPage
   ],
   imports: [
     BrowserModule,
+    HttpClientModule,
     IonicModule.forRoot(MyApp),
     IonicStorageModule.forRoot()
   ],
@@ -48,14 +67,24 @@ import { TimelineProvider } from '../providers/timeline/timeline';
     TimelineViewPage,
     MakeTimelineGiftPage,
     MakeLinkMethodSelectPage,
-    ReceiveTimelineGiftPage
+    ReceiveTimelineGiftPage,
+    QrCodeScannerPage,
+    ImageEntryViewPage
   ],
   providers: [
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     UserIdProvider,
-    TimelineProvider
+    TimelineProvider,
+    NFC, Ndef,
+    ImagePicker,
+    QRScanner,
+    HttpClient,
+    HTTP,
+    HybridHttpProvider,
+    InAppBrowser,
+    File
   ]
 })
 export class AppModule {}

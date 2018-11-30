@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, LoadingController } from 'ionic-angular';
 
 import { ReceiveMethodSelectPage } from '../receive-method-select/receive-method-select';
 import { MakeGiftPage } from '../make-gift/make-gift';
@@ -8,6 +8,8 @@ import { TimelineViewPage } from '../timeline-view/timeline-view';
 import { MakeTimelineGiftPage } from '../make-timeline-gift/make-timeline-gift';
 
 import { Timeline } from '../../objects/timeline/timeline';
+import { TimelineEntry } from '../../objects/timeline-entry/timeline-entry';
+
 import { TimelineProvider } from '../../providers/timeline/timeline';
 
 import { ReceiveTimelineGiftPage } from '../receive-timeline-gift/receive-timeline-gift';
@@ -23,7 +25,8 @@ export class HomePage {
 
   constructor(
     public navCtrl: NavController,
-    private timelineProvider: TimelineProvider
+    private timelineProvider: TimelineProvider,
+    public loadingCtrl: LoadingController
   ) {
   }
 
@@ -75,9 +78,24 @@ export class HomePage {
     this.navCtrl.push(ReceiveMethodSelectPage);
   }
 
-  private openSentGift(giftData) {
+  private openSentGift(giftData: Timeline) {
     console.log("openSentGift("+JSON.stringify(giftData)+")");
-    this.navCtrl.push(MakeTimelineGiftPage, { "timeline": giftData });
+    if (giftData.getTimelineID() < 0) {
+      this.navCtrl.push(MakeTimelineGiftPage, { "timeline": giftData });
+    } else {
+      let loading = this.loadingCtrl.create({content: 'Checking for updates...'});
+      loading.present();
+      this.timelineProvider.checkServerForUpdate(giftData).then((timeline)=>{
+        this.timelineProvider.saveTimeline(timeline).then(()=>{
+          loading.dismiss();
+          this.navCtrl.push(MakeTimelineGiftPage, { "timeline": timeline });
+        }).catch((reason)=>{
+          loading.dismiss();
+          console.error("Error while attempting to save updated timeline.", [reason]);
+          this.navCtrl.push(MakeTimelineGiftPage, { "timeline": timeline });
+        });
+      });
+    }
   }
 
   private openReceiveGift(giftData) {
@@ -105,4 +123,51 @@ export class HomePage {
   private debugDeleteFromReceivedList(timeline: Timeline) {
     this.timelineProvider.removeTimelineFromReceivedGifts(timeline);
   }
+
+
+  private addTimeline3() {
+    console.log("getting timeline 3");
+    this.timelineProvider.getTimeline(3).then((timeline)=>{
+      console.log("adding timeline 3 to gifts");
+      this.timelineProvider.addTimelineToReceivedGifts(timeline).then(()=>{
+        console.log("added");
+      }).catch((reason)=>{
+        console.log("not added");
+        console.log(reason);
+      })
+    }).catch((reason)=>{
+      console.log("could not get timeline 3");
+      console.log(reason);
+    });
+  }
+
+  private testUploadTimeline() {
+    var shortDesc = prompt("shortDesc:", "");
+    var longDesc = prompt("longDesc:", "");
+    let timeline = new Timeline(null);
+    timeline.setDescriptions(shortDesc, longDesc);
+    this.timelineProvider.publishTimeline(timeline, []).then((value)=>{
+      console.log("publishTimeline then");
+      console.log(value);
+    }).catch((reason)=>{
+      console.log("publishTimeline catch");
+      console.log(reason);
+    });
+  }
+  private testUploadTimelineEntry() {
+    var id = parseInt(prompt("timeline id:", "4"));
+    var text = prompt("Enter message:", "");
+    let timelineEntry = TimelineEntry.createTextEntry(id, "", "http://www.artcodes.co.uk/hg/?hgid=test1", text);
+    this.timelineProvider.publishTimelineEntry(timelineEntry, null).then((value)=>{
+      console.log("publishTimelineEntry then");
+      console.log(value);
+    }).catch((reason)=>{
+      console.log("publishTimelineEntry catch");
+      console.log(reason);
+    });
+  }
+
+
+  
+
 }

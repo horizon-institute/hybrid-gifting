@@ -1,6 +1,23 @@
 page-home {
 
 
+    div.toolbar-background {
+        /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#abc370+0,f8a65f+100 */
+background: rgb(171,195,112); /* Old browsers */
+background: -moz-linear-gradient(-45deg, rgba(171,195,112,1) 0%, rgba(248,166,95,1) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(-45deg, rgba(171,195,112,1) 0%,rgba(248,166,95,1) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(135deg, rgba(171,195,112,1) 0%,rgba(248,166,95,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#abc370', endColorstr='#f8a65f',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+    }
+
+
+    div.toolbar-title {
+        white-space: normal;
+        color: #000;
+        text-align: center;
+        font-size: 150%;
+    }
+
 
     div.card-headline {
         position: relative;
@@ -63,6 +80,7 @@ filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f8a65f', end
     
 }
 
+
 ion-content.content {
     background-attachment: fixed;
     /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#3f4c6b+0,305099+50,3f4c6b+100 */
@@ -83,4 +101,95 @@ ion-card.limit-width {
     max-width: 360px;    
     margin-right: auto;
     margin-left: auto;
+}
+html.transparentUI,
+.transparentUI body,
+.transparentUI ion-app,
+.transparentUI ion-content.content,
+.transparentUI .nav-decor {
+    background: transparent !important;
+}
+
+
+
+body.nfcSupported .nfcFeature {opacity: 1.0;}
+body.nfcNotSupported .nfcFeature {opacity: 0.5;}
+
+
+
+.image-gift-receive-jpg {
+    background-image: url('../assets/imgs/gift-receive--w480.jpg');
+    padding-top: percentage(337/480);
+    background-size: 100%;
+}
+.image-gift-send-jpg {
+    background-image: url('../assets/imgs/gift-send--w480.jpg');
+    padding-top: percentage(325/480);
+    background-size: 100%;
+}
+
+@media only screen and (min-width: 481px) and (max-width: 540px) and (-webkit-min-device-pixel-ratio: 1),
+(min-width: 241px) and (max-width: 270px) and (-webkit-min-device-pixel-ratio: 2),
+(min-width: 161px) and (max-width: 180px) and (-webkit-min-device-pixel-ratio: 3)  {
+    .image-gift-receive-jpg {
+        background-image: url('../assets/imgs/gift-receive--w540.jpg');
+        padding-top: percentage(379/540);
+    }
+    .image-gift-send-jpg {
+        background-image: url('../assets/imgs/gift-send--w540.jpg');
+        padding-top: percentage(366/540);
+    }
+}
+@media only screen and (min-width: 541px) and (max-width: 720px) and (-webkit-min-device-pixel-ratio: 1),
+(min-width: 271px) and (max-width: 360px) and (-webkit-min-device-pixel-ratio: 2),
+(min-width: 181px) and (max-width:240px) and (-webkit-min-device-pixel-ratio: 3) {
+    .image-gift-receive-jpg {
+        background-image: url('../assets/imgs/gift-receive--w720.jpg');
+        padding-top: percentage(505/720);
+    }
+    .image-gift-send-jpg {
+        background-image: url('../assets/imgs/gift-send--w720.jpg');
+        padding-top: percentage(488/720);
+    }
+}
+@media only screen and (min-width: 721px) and (max-width: 1080px) and (-webkit-min-device-pixel-ratio: 1),
+(min-width: 361px) and (max-width: 540px) and (-webkit-min-device-pixel-ratio: 2),
+(min-width: 241px) and (max-width: 360px) and (-webkit-min-device-pixel-ratio: 3) {
+    .image-gift-receive-jpg {
+        background-image: url('../assets/imgs/gift-receive--w1080.jpg');
+        padding-top: percentage(758/1080);
+    }
+    .image-gift-send-jpg {
+        background-image: url('../assets/imgs/gift-send--w1080.jpg');
+        padding-top: percentage(732/1080);
+    }
+}
+@media only screen and (min-width: 1081px) and (max-width: 1440px) and (-webkit-min-device-pixel-ratio: 1),
+(min-width: 541px) and (max-width: 720px) and (-webkit-min-device-pixel-ratio: 2),
+(min-width: 361px) and (max-width: 480px) and (-webkit-min-device-pixel-ratio: 3) {
+    .image-gift-receive-jpg {
+        background-image: url('../assets/imgs/gift-receive--w1440.jpg');
+        padding-top: percentage(1010/1440);
+    }
+    .image-gift-send-jpg {
+        background-image: url('../assets/imgs/gift-send--w1440.jpg');
+        padding-top: percentage(976/1440);
+    }
+}
+@media only screen and (min-width: 1441px) and (-webkit-min-device-pixel-ratio: 1),
+(min-width: 721px) and (-webkit-min-device-pixel-ratio: 2),
+(min-width: 481px) and (-webkit-min-device-pixel-ratio: 3) {
+    .image-gift-receive-jpg {
+        background-image: url('../assets/imgs/gift-receive--w2048.jpg');
+        padding-top: percentage(1437/2048);
+    }
+    .image-gift-send-jpg {
+        background-image: url('../assets/imgs/gift-send--w2048.jpg');
+        padding-top: percentage(1388/2048);
+    }
+}
+
+
+p.timeline-entry-text, p.timeline-entry-url {
+    color: black;
 }

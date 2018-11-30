@@ -3,21 +3,17 @@
     <ion-title>
         Hybrid Gifting
     </ion-title>
-    <ion-buttons end>
-      <button ion-button (click)="signin()">
-        Login
-      </button>
-    </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding class="card-background-page">
-  <h1>Hybrid Gifting</h1>
-  <p>You can use this app to send and receive hybrid gifts – physical gifts with digital content.</p>
+  <!--<h1>Hybrid Gifting</h1>-->
+  <p style="text-align: center;">You can use this app to send and receive hybrid gifts – physical gifts with digital content.</p>
 
   <ion-card>
     <div class="card-headline" (tap)="sendGift()">
-      <img src="assets/imgs/gift-send.jpg"/>
+      <!--<img src="assets/imgs/gift-send.jpg"/>-->
+      <div class="image-gift-send-jpg"></div>
       <div class="image-gradient-cover image-gradient-cover-give"></div>
       <div class="headline-content">
         <div class="card-title">Send a gift</div>
@@ -34,7 +30,7 @@
       </ion-item>
       <ion-item-sliding *ngFor="let item of sent">
         <button ion-item detail-none  (tap)="openSentGift(item)">
-          Gift #{{ item.getTimelineID() }}
+          {{ item.getTimelineID() < 0 ? "Unsent" : "Sent" }} Gift #{{ item.getTimelineID() }}
           <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
         </button>
         <ion-item-options side="right">
@@ -42,10 +38,12 @@
             <ion-icon name="remove-circle"></ion-icon>
             Delete
           </button>
+          <!--
           <button ion-button color="default" (tap)="debugAddGiftToReceived(item)">
             <ion-icon name="bug"></ion-icon>
             MOVE
           </button>
+          -->
           <button ion-button color="default" (tap)="debugDeleteFromSentList(item)">
             <ion-icon name="bug"></ion-icon>
             Delete from list
@@ -57,7 +55,8 @@
 
   <ion-card>
     <div class="card-headline" (tap)="receiveGift()">
-      <img src="assets/imgs/gift-receive.jpg"/>
+      <!--<img src="assets/imgs/gift-receive.jpg"/>-->
+      <div class="image-gift-receive-jpg"></div>
       <div class="image-gradient-cover image-gradient-cover-receive"></div>
       <div class="headline-content">
         <div class="card-title">Receive a gift</div>
@@ -74,7 +73,7 @@
       </ion-item>
       <ion-item-sliding *ngFor="let item of received">
         <button ion-item detail-none (tap)="openReceiveGift(item)">
-          Gift #{{ item.getTimelineID() }}
+          Received Gift #{{ item.getTimelineID() }}
           <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
         </button>
         <ion-item-options side="right">
@@ -90,5 +89,10 @@
       </ion-item-sliding>
     </ion-list>
   </ion-card>
-
+<!--
+  <button ion-button (tap)="addTimeline3()">DEBUG: add timeline 3</button>
+  <button ion-button (tap)="testUploadTimeline()">DEBUG: Create new timeline</button>
+  <button ion-button (tap)="testUploadTimelineEntry()">DEBUG: Create timeline entry (text)</button>
+  <button ion-button (tap)="testUploadTimelineEntryImage()">DEBUG: Create timeline entry (image)</button>
+-->
 </ion-content>

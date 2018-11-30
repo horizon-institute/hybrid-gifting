@@ -23,8 +23,9 @@
       <!-- Content -->
       <ng-container *ngFor="let contentEntry of timelineEntries">
         <ion-item *ngIf="contentEntry.getMetadata('hg_entry_type') != 'link' && contentEntry.getMetadata('hg_link_uri') == entry.getMetadata('hg_link_uri')">
-          <img *ngIf="contentEntry.getMetadata('hg_entry_type') == 'image'" src="{{ contentEntry.getLocalContentURI() }}"/>
-          <p   *ngIf="contentEntry.getMetadata('hg_entry_type') == 'text'" >{{ decodeBase64TextURI(contentEntry.getLocalContentURI()) }}</p>
+          <img *ngIf="contentEntry.getMetadata('hg_entry_type') == 'image'" class="timeline-entry-image" src="{{ timelineProvider.replaceFilePathVariables(contentEntry.getLocalContentURI()) }}" (tap)="openImage(contentEntry)"/>
+          <p   *ngIf="contentEntry.getMetadata('hg_entry_type') == 'text'"  class="timeline-entry-text" [style.font-size.%]="fontStyleForText(decodeBase64TextURI(contentEntry.getLocalContentURI()))" >{{ decodeBase64TextURI(contentEntry.getLocalContentURI()) }}</p>
+          <p   *ngIf="contentEntry.getMetadata('hg_entry_type') == 'url'"   class="timeline-entry-url" >{{contentEntry.getMetadata('title')}}<br><a href="#" (tap)="openUrl(decodeBase64TextURI(contentEntry.getLocalContentURI()))">{{ decodeBase64TextURI(contentEntry.getLocalContentURI()) }}</a></p>
         </ion-item>
       </ng-container>
 
@@ -72,11 +73,23 @@
     </ion-item>
   </ion-card>
 
-  <ion-card *ngIf="toRevealQRCodes == 0 && toRevealNFCTags == 0 && toRevealArtcodes == 0" class="limit-width">
-    <button ion-item detail-none (tap)="send()">
+  <ion-card *ngIf="toRevealQRCodes == 0 && toRevealNFCTags == 0 && toRevealArtcodes == 0 && hasWritenThakyou == false" class="limit-width">
+    <button ion-item detail-none (tap)="sendThankYouNote()">
       Send thank you note
       <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
     </button>
   </ion-card>
+
+  <ng-container *ngIf="hasWritenThakyou">
+    <p style="text-align: center;">Your response:</p>
+    <ng-container *ngFor="let entry of timelineEntries">
+      <ion-card *ngIf="entry.isThankYouNote()">
+          <ion-item>
+            <p>{{ decodeBase64TextURI(entry.getLocalContentURI()) }}</p>
+          </ion-item>
+      </ion-card>
+    </ng-container>
+  </ng-container>
+
 
 </ion-content>

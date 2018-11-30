@@ -13,8 +13,8 @@ export class TimelineEntryId {
     constructor(timelineId: number, type: string, id = -1) {
       this.timelineId = timelineId;
       if (type == "local") {
-        this.type = "local";
         this.id = id == -1 ? uuid() : id;
+        this.type = this.id.length==uuid().length ? "local" : "remote";
       } else if (type == "remote") {
         this.type = "remote";
         this.id = ""+id;
@@ -38,7 +38,14 @@ export class TimelineEntryId {
       return this.type == "remote";
     }
     
+    public setPublishedID(publishedId: number) {
+      this.type = 'remote';
+      this.id = ''+publishedId;
+    }
 
+    public setPublishedTimelineID(publishedId: number) {
+      this.timelineId = publishedId;
+    }
 
 
 }

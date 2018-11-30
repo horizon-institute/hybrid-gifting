@@ -8,11 +8,22 @@
 
 <ion-content padding>
 
+  <ng-container *ngFor="let entry of timelineEntries">
+    <ng-container *ngIf="entry.isThankYouNote()">
+      <p style="text-align: center;">Their response:</p>
+      <ion-card class="thankyounote">
+        <ion-item>
+          <p>{{ decodeBase64TextURI(entry.getLocalContentURI()) }}</p>
+        </ion-item>
+      </ion-card>
+    </ng-container>
+  </ng-container>
+
   <p style="text-align: center;" *ngIf="addLinkCount == 0">First add a digial link to your physical gift. This is the connection between your physical and digital content.</p>
 
-  <p style="text-align: center;" *ngIf="addLinkCount > 0 && addContentCount == 0">Now try adding some content to this link.</p>
+  <p style="text-align: center;" *ngIf="shouldAddDefaultContent && addLinkCount > 0 && addContentCount <= 1">We have started you off with content from Debbie Bryan. Try adding some content to this link.</p>
 
-  <p style="text-align: center;" *ngIf="addContentCount == 1">You can add more than one piece of content to each link.</p>
+  <p style="text-align: center;" *ngIf="addContentCount <= 2">You can add more than one piece of content to each link.</p>
 
   <ng-container *ngFor="let entry of timelineEntries">
     <ion-card *ngIf="entry.getMetadata('hg_entry_type') == 'link'">
@@ -27,13 +38,15 @@
         <button ion-button outline item-end *ngIf="entry.getId().isLocal()" (tap)="removeLink(entry.getMetadata('hg_link_uri'))">
           Remove
         </button>
+
       </ion-item>
 
       <!-- Content -->
       <ng-container *ngFor="let contentEntry of timelineEntries">
         <ion-item *ngIf="contentEntry.getMetadata('hg_entry_type') != 'link' && contentEntry.getMetadata('hg_link_uri') == entry.getMetadata('hg_link_uri')">
-          <img *ngIf="contentEntry.getMetadata('hg_entry_type') == 'image'" src="{{ contentEntry.getLocalContentURI() }}"/>
-          <p   *ngIf="contentEntry.getMetadata('hg_entry_type') == 'text'" >{{ decodeBase64TextURI(contentEntry.getLocalContentURI()) }}</p>
+          <img *ngIf="contentEntry.getMetadata('hg_entry_type') == 'image'" class="timeline-entry-image" src="{{ timelineProvider.replaceFilePathVariables(contentEntry.getLocalContentURI()) }}"/>
+          <p   *ngIf="contentEntry.getMetadata('hg_entry_type') == 'text'"  class="timeline-entry-text" [style.font-size.%]="fontStyleForText(decodeBase64TextURI(contentEntry.getLocalContentURI()))" >{{ decodeBase64TextURI(contentEntry.getLocalContentURI()) }}</p>
+          <p   *ngIf="contentEntry.getMetadata('hg_entry_type') == 'url'"   class="timeline-entry-url" >{{contentEntry.getMetadata('title')}}<br><a href="#" (tap)="openUrl(decodeBase64TextURI(contentEntry.getLocalContentURI()))">{{ decodeBase64TextURI(contentEntry.getLocalContentURI()) }}</a></p>
           <button ion-button outline item-end *ngIf="contentEntry.getId().isLocal()" (tap)="removeContent(contentEntry.getId())">
             Remove
           </button>
@@ -50,27 +63,40 @@
           Add photo
           <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
         </button>
+        <button ion-item detail-none (tap)="addContent(entry.getMetadata('hg_link_uri'), 'url')">
+          Add link
+          <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+        </button>
       </ion-list>
 
     </ion-card>
   </ng-container>
 
-  <p style="text-align: center;" *ngIf="addLinkCount == 1">You can add more than one link to your gift, or keep it simple with one.</p>
+  <ng-container *ngIf="timeline.getTimelineID() < 0 ">
+    <p style="text-align: center;" *ngIf="addLinkCount == 1">You can add more than one link to your gift, or keep it simple with one.</p>
 
-  <ion-card class="limit-width">
-    <button ion-item detail-none (tap)="addLink()">
-      {{ timelineEntries.length == 0 ? 'Link to your physical gift' : 'Add another link to your physical gift' }}
-      <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
-    </button>
-  </ion-card>
+    <ion-card class="limit-width">
+      <button ion-item detail-none (tap)="addLink()">
+        {{ timelineEntries.length == 0 ? 'Link to your physical gift' : 'Add another link to your physical gift' }}
+        <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+      </button>
+    </ion-card> 
 
-  <p style="text-align: center;" *ngIf="timelineEntries.length > 1">Note: you can't remove or change content after sending!</p>
-  
-  <ion-card *ngIf="timelineEntries.length > 1" class="limit-width">
-    <button ion-item detail-none (tap)="send()">
-      Send
-      <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
-    </button>
+    <p style="text-align: center;" *ngIf="timelineEntries.length > 1">Note: you can't remove or change content after uploading!</p>
+    
+    <ion-card *ngIf="timelineEntries.length > 1 && containsUnpublishedData" class="limit-width">
+      <button ion-item detail-none (tap)="publish()">
+        Upload
+        <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+      </button>
+    </ion-card>
+  </ng-container>
+
+  <ion-card *ngIf="timeline.hasArtcodesShareUrl()" class="limit-width">
+    <ion-item>
+      To share the digital content with the recipient please send them this link they can copy/paste into this app:<br>
+      <textarea>{{timeline.getArtcodesShareUrl()}}</textarea>
+    </ion-item>
   </ion-card>
 
 </ion-content>

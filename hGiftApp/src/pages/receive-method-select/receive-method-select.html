@@ -15,7 +15,7 @@
 
 <ion-content padding>
 
-    <ion-card class="limit-width">
+    <ion-card class="limit-width"  (tap)="readQR()">
       <!-- Start of vertical center wrapper --><table class="vertical-align-table-wrapper"><tr>
         <td valign="middle" style="width:33%;">
           <img src="assets/imgs/example-qrcode.png"/>
@@ -29,7 +29,7 @@
         </td>
       <!-- End of vertical center wrapper --></tr></table>
     </ion-card>
-    <ion-card class="limit-width">
+    <ion-card class="limit-width nfcFeature" (tap)="readNFC()">
         <!-- Start of vertical center wrapper --><table class="vertical-align-table-wrapper"><tr>
           <td valign="middle" style="width:33%;">
             <img src="assets/imgs/example-nfc.png"/>
@@ -43,16 +43,20 @@
           </td>
         <!-- End of vertical center wrapper --></tr></table>
     </ion-card>
-    <ion-card class="limit-width">
+    <ion-card class="limit-width" (tap)="enterArtcodes()">
         <!-- Start of vertical center wrapper --><table class="vertical-align-table-wrapper"><tr>
           <td valign="middle" style="width:33%;">
             <img src="assets/imgs/example-artcode.png"/>
           </td>
           <td valign="middle" style="width:66%;">
             <div class="card-title">
-              I received a separate e-mail. <br>
-              Your gift has Artcodes, open the link in the e-mail.
+              I received a separate link to copy/paste into this app. <br>
+              Your gift has Artcodes.
             </div>
+            <button ion-button clear small>
+                Enter here
+              <ion-icon name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+            </button>
           </td>
         <!-- End of vertical center wrapper --></tr></table>
     </ion-card>
