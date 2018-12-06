@@ -1,4 +1,4 @@
-<ion-header>
+<ion-header  *ngIf="!isWebBuild">
   <ion-navbar>
     <ion-title>
         Hybrid Gifting
@@ -7,54 +7,82 @@
 </ion-header>
 
 <ion-content padding class="card-background-page">
-  <!--<h1>Hybrid Gifting</h1>-->
-  <p style="text-align: center;">You can use this app to send and receive hybrid gifts – physical gifts with digital content.</p>
 
-  <ion-card>
-    <div class="card-headline" (tap)="sendGift()">
-      <!--<img src="assets/imgs/gift-send.jpg"/>-->
-      <div class="image-gift-send-jpg"></div>
-      <div class="image-gradient-cover image-gradient-cover-give"></div>
-      <div class="headline-content">
-        <div class="card-title">Send a gift</div>
-        <div class="card-subtitle"></div>
-      </div>
-      <button ion-button clear small color="light">
-        Assign digital content
-        <ion-icon name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
-      </button>
+
+  <ng-container *ngIf="isWebBuild">
+    <div style="margin-top: 4em;"></div>
+    <div id="hg-logo"></div>
+    <p style="text-align: center; font-size: 200%;">
+      Hybrid Gifting
+    </p>
+    <p style="text-align: center;"  *ngIf="!webGiftIsAvailble">
+      Download the Hybrid Gifting app to create hybird physical-digital gifts.
+    </p>
+    <p style="text-align: center;"  *ngIf="webGiftIsAvailble">
+      Download the Hybrid Gifting app to unlock the digital content inside your gift.
+    </p>
+    <div showWhen="android">
+        <a class="google-play-banner" href="https://play.google.com/store/apps/details?id=uk.ac.horizon.hgift&utm_source=global_co&utm_medium=prtnr&utm_content=Mar2515&utm_campaign=PartBadge&pcampaignid=MKT-AC-global-none-all-co-pr-py-PartBadges-Oct1515-1"><img style="width:49%;max-width:135px;display: block;margin-left: auto;margin-right: auto;" alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/apps/en-play-badge.png"></a>
     </div>
-    <ion-list>
-      <ion-item *ngIf="sent.length != 0" style="white-space: normal;">
-        Gifts you have made:
-      </ion-item>
-      <ion-item-sliding *ngFor="let item of sent">
-        <button ion-item detail-none  (tap)="openSentGift(item)">
-          {{ item.getTimelineID() < 0 ? "Unsent" : "Sent" }} Gift #{{ item.getTimelineID() }}
-          <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+    <div showWhen="ios">
+        <p style="text-align: center;"><a href="https://testflight.apple.com/join/m0YFL47n" style="color:white; border: 1px solid white; border-radius: 3px; text-decoration: none; padding: 0.2em 1em;">Join the iOS beta, tap here.</a></p>
+    </div>
+    <div *ngIf="webGiftIsAvailble" style="margin: 4em 0em;">
+      <p style="text-align: center;"><span (tap)="loadWebGift()"  style="color:white; border: 1px solid white; border-radius: 3px; text-decoration: none; padding: 0.2em 1em;">View gift in web app</span></p>
+    </div>
+  </ng-container>
+
+  <ng-container *ngIf="!isWebBuild">
+
+    <p style="text-align: center;">You can use this app to send and receive hybrid gifts – physical gifts with digital content.</p>
+
+    <ion-card>
+      <div class="card-headline" (tap)="sendGift()">
+        <!--<img src="assets/imgs/gift-send.jpg"/>-->
+        <div class="image-gift-send-jpg"></div>
+        <div class="image-gradient-cover image-gradient-cover-give"></div>
+        <div class="headline-content">
+          <div class="card-title">Send a gift</div>
+          <div class="card-subtitle"></div>
+        </div>
+        <button ion-button clear small color="light">
+          Assign digital content
+          <ion-icon name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
         </button>
-        <ion-item-options side="right">
-          <button ion-button color="danger" (tap)="deleteGift(item)">
-            <ion-icon name="remove-circle"></ion-icon>
-            Delete
+      </div>
+      <ion-list>
+        <ion-item *ngIf="sent.length != 0" style="white-space: normal;">
+          Gifts you have made:
+        </ion-item>
+        <ion-item-sliding *ngFor="let item of sent">
+          <button ion-item detail-none  (tap)="openSentGift(item)">
+            {{ item.getTimelineID() < 0 ? "Unsent" : "Sent" }} Gift #{{ item.getTimelineID() }}
+            <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
           </button>
-          <!--
-          <button ion-button color="default" (tap)="debugAddGiftToReceived(item)">
-            <ion-icon name="bug"></ion-icon>
-            MOVE
-          </button>
-          -->
-          <button ion-button color="default" (tap)="debugDeleteFromSentList(item)">
-            <ion-icon name="bug"></ion-icon>
-            Delete from list
-          </button>
-        </ion-item-options>
-      </ion-item-sliding>
-    </ion-list>
-  </ion-card>
+          <ion-item-options side="right">
+            <button ion-button color="danger" (tap)="deleteGift(item)">
+              <ion-icon name="remove-circle"></ion-icon>
+              Delete
+            </button>
+            <!--
+            <button ion-button color="default" (tap)="debugAddGiftToReceived(item)">
+              <ion-icon name="bug"></ion-icon>
+              MOVE
+            </button>
+            <button ion-button color="default" (tap)="debugDeleteFromSentList(item)">
+              <ion-icon name="bug"></ion-icon>
+              Delete from list
+            </button>
+            -->
+          </ion-item-options>
+        </ion-item-sliding>
+      </ion-list>
+    </ion-card>
+
+  </ng-container>
 
   <ion-card>
-    <div class="card-headline" (tap)="receiveGift()">
+    <div class="card-headline" (tap)="receiveGift()" *ngIf="!isWebBuild">
       <!--<img src="assets/imgs/gift-receive.jpg"/>-->
       <div class="image-gift-receive-jpg"></div>
       <div class="image-gradient-cover image-gradient-cover-receive"></div>
@@ -81,10 +109,12 @@
             <ion-icon name="remove-circle"></ion-icon>
             Delete
           </button>
+          <!--
           <button ion-button color="default" (tap)="debugDeleteFromReceivedList(item)">
             <ion-icon name="bug"></ion-icon>
             Delete from list
           </button>
+          -->
         </ion-item-options>
       </ion-item-sliding>
     </ion-list>

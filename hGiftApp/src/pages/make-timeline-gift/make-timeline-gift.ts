@@ -71,13 +71,20 @@ export class MakeTimelineGiftPage {
       console.log("loaded "+timelineEntries.length + " entries from "+ids.length+" IDs");
       this.timelineEntries = timelineEntries;
 
-      for (var i=0; i<this.timelineEntries.length; ++i) {
-        let entry = this.timelineEntries[i];
-        if (entry.getId().isLocal()) {
-          this.containsUnpublishedData =true;
-          break;
+      this.zone.run(()=>{
+        for (var i=0; i<this.timelineEntries.length; ++i) {
+          let entry = this.timelineEntries[i];
+          if (entry.getId().isLocal()) {
+            this.containsUnpublishedData = true;
+          }
+          if (entry.isLink()) {
+            ++this.addLinkCount;
+          }
+          if (!entry.isLink() && !entry.isReveal() && !entry.isThankYouNote()) {
+            ++this.addContentCount;
+          }
         }
-      }
+      });
     }).catch((reason)=>{
       alert("There was an error. (1)");
       console.log(reason);

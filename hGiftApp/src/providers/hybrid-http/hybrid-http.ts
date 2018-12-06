@@ -3,6 +3,8 @@ import { HTTP, HTTPResponse } from '@ionic-native/http';
 import { Injectable } from '@angular/core';
 
 import { File } from '@ionic-native/file';
+import { GlobalUtils } from '../../objects/global-utils/global-utils';
+
 
 /*
   This provider abstracts HTTP calls from Angular AJAX and Cordova Native plugins.
@@ -12,7 +14,7 @@ import { File } from '@ionic-native/file';
 @Injectable()
 export class HybridHttpProvider {
 
-  private native = true;
+  private native = !GlobalUtils.isWebBuild();
 
   constructor(
     private http: HttpClient,
@@ -22,7 +24,8 @@ export class HybridHttpProvider {
     console.log('Hello HybridHttpProvider Provider');
   }
 
-  public get(url: string, headers={}): Promise<{}> {
+  public get(url: string, headers={}, expectedType="json"): Promise<{}> {
+    console.log("HybridHttpProvider GET "+url);
     if (this.native) {
       return this.nhttp.get(url, {}, headers).then((value: HTTPResponse)=>{
         console.log(value);
@@ -35,15 +38,49 @@ export class HybridHttpProvider {
         return result;
       });
     } else {
-      // TODO: 
-      return this.http.get(url).toPromise().then((value)=>{ 
-        console.log(value);
-        return {
-          "code": parseInt(value['status']),
-          "headers": value['headers'],
-          "body": value['body']
-        };
-      });
+      if (expectedType=="json") {
+        return this.http.get(url, {"responseType": "json"}).toPromise().then((value)=>{ 
+          console.log(value);
+          return {
+            "code": 200,
+            "headers": [],
+            "body": value
+          };
+        });
+      } else if (expectedType=="text") {
+        return this.http.get(url, {"responseType": "text"}).toPromise().then((value)=>{ 
+          console.log(value);
+          return {
+            "code": 200,
+            "headers": [],
+            "body": value
+          };
+        });
+      } else if (expectedType=="base64") {
+        return new Promise<{}>((resolve, reject)=>{
+
+          this.http.get(url, {"responseType": "blob"}).toPromise().then((value)=>{ 
+            console.log(value);
+
+            var reader = new FileReader();
+            reader.onloadend = function() {
+                let base64data: string = reader.result as string;                
+                console.log(base64data);
+                resolve({
+                  "code": 200,
+                  "headers": [],
+                  "body": base64data.substr(base64data.indexOf(',')+1),
+                  "base64": base64data.substr(base64data.indexOf(',')+1)
+                });
+            }
+            reader.readAsDataURL(value); 
+            
+          }).catch((reason)=>{
+            reject(reason);
+          });
+
+        });
+      }
     }
   }
 
@@ -103,7 +140,13 @@ export class HybridHttpProvider {
       });
       */
     } else {
-      // TODO: 
+      return this.http.post(url, body).toPromise().then((value)=>{
+        return {
+          "code": 200,
+          "headers": [],
+          "body": value
+        };
+      });
     }
   }
 }

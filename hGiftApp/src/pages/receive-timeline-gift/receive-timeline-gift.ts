@@ -17,6 +17,7 @@ import { UserIdProvider } from '../../providers/user-id/user-id';
 
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { ImageEntryViewPage } from '../image-entry-view/image-entry-view';
+import { GlobalUtils } from '../../objects/global-utils/global-utils';
 
 // declare "Artcodes" so we can access the javascript object
 declare var Artcodes;
@@ -27,6 +28,8 @@ declare var Artcodes;
   templateUrl: 'receive-timeline-gift.html',
 })
 export class ReceiveTimelineGiftPage {
+
+  private isWebBuild = GlobalUtils.isWebBuild(); // Can't access directly from html template.
 
   private timeline: Timeline;
   private timelineEntries: TimelineEntry[] = [];
@@ -107,8 +110,35 @@ export class ReceiveTimelineGiftPage {
         }
       });
 
+
       if (revealEntry != null) {
-        this.pushRevealEntry(revealEntry);
+        var alreadyRevealed = false;
+        for (var i=0; i<this.timelineEntries.length; ++i) {
+          let entry = this.timelineEntries[i];
+          if (
+            entry.isReveal() && 
+            entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI) == revealEntry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI) &&
+            entry.getUserId() == revealEntry.getUserId()
+          ) {
+            alreadyRevealed = true;
+            break;
+          }
+        }
+
+        // add reveal link type if not known (e.g a web event)
+        if (revealEntry.getMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE) == "") {
+          for (var i=0; i<this.timelineEntries.length; ++i) {
+            let entry = this.timelineEntries[i];
+            if (entry.isLink() && entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI) == revealEntry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI)) {
+              console.log("Setting revealEntry link type to "+entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE));
+              revealEntry.addMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE, entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE));
+            }
+          }
+        }
+
+        if (!alreadyRevealed) {
+          this.pushRevealEntry(revealEntry);
+        }
       }
 
       loading.dismiss();
@@ -232,6 +262,7 @@ export class ReceiveTimelineGiftPage {
   }
 
   private scanQR() {
+    if (this.isWebBuild) return;
     this.navCtrl.push(QrCodeScannerPage, { callback: (uri:string)=>{
       this.handleResult(uri, TimelineEntry.LINK_TYPE_QRCODE);
     } });
@@ -326,9 +357,9 @@ export class ReceiveTimelineGiftPage {
   }
 
   private startNFC() {
-    // TODO: ...
+    if (this.isWebBuild) return;
 
-    let debug = true;
+    let debug = false;
     if (debug) {
       for (var i=0; i<this.timelineEntries.length; ++i) {
         let entry = this.timelineEntries[i];
@@ -343,6 +374,8 @@ export class ReceiveTimelineGiftPage {
           this.pushRevealEntry(revealEntry);
         }
       }
+    } else {
+      this.makeLinkNFCTag();
     }
   }
 
@@ -366,7 +399,7 @@ export class ReceiveTimelineGiftPage {
           this.nfcIsSupported = true; 
           this.nfcIsEnabled = false;
         } else {
-          alert("NFC is not available: "+JSON.stringify(reason));
+          //alert("NFC is not available: "+JSON.stringify(reason));
         }
       });
     });
@@ -439,7 +472,7 @@ export class ReceiveTimelineGiftPage {
                 this.nfcSubscriber.unsubscribe();
                 this.nfcSubscriber = null;
                 this.handleResult(str, TimelineEntry.LINK_TYPE_NFC);
-                this.navCtrl.pop();
+                //this.navCtrl.pop();
               } else {
                 alert("Not a valid NFC tag.");
               }

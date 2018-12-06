@@ -53,7 +53,19 @@ export class TimelineEntry {
     }
 
     public addMetadata(key: string, value: string): boolean {
-        if (key.length < 256 && value.length < 256 && this.source['status'] == "local") {
+        if (value==null) {
+            console.error("TimelineEntry.addMetadata("+JSON.stringify(key)+", "+JSON.stringify(value)+")");
+        } else {
+            console.log("TimelineEntry.addMetadata("+JSON.stringify(key)+", "+JSON.stringify(value)+")");
+        }
+        if (key!=null && value!=null && key.length < 256 && value.length < 256 && this.source['status'] == "local") {
+            for (var i=0; i<this.source['metadata'].length; ++i) {
+                if (this.source['metadata'][i]["key"] == key) {
+                    console.log("TimelineEntry.addMetadata: Replacing value for key '"+key+"', '"+this.source['metadata'][i]["value"]+"' -> '"+value+"'");
+                    this.source['metadata'][i]["value"] = value;
+                    return true;
+                }
+            }
             this.source['metadata'].push({"key": key, "value": value});
             return true;
         }

@@ -72,25 +72,28 @@
     </ion-card>
   </ng-container>
 
-  <ng-container *ngIf="timeline.getTimelineID() < 0 ">
-    <p style="text-align: center;" *ngIf="addLinkCount == 1">You can add more than one link to your gift, or keep it simple with one.</p>
+  <p style="text-align: center;" *ngIf="addLinkCount == 1">You can add more than one link to your gift, or keep it simple with one.</p>
 
-    <ion-card class="limit-width">
-      <button ion-item detail-none (tap)="addLink()">
-        {{ timelineEntries.length == 0 ? 'Link to your physical gift' : 'Add another link to your physical gift' }}
-        <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
-      </button>
-    </ion-card> 
+  <ion-card class="limit-width">
+    <button ion-item detail-none (tap)="addLink()">
+      {{ timelineEntries.length == 0 ? 'Link to your physical gift' : 'Add another link to your physical gift' }}
+      <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+    </button>
+  </ion-card> 
+
 
     <p style="text-align: center;" *ngIf="timelineEntries.length > 1">Note: you can't remove or change content after uploading!</p>
     
     <ion-card *ngIf="timelineEntries.length > 1 && containsUnpublishedData" class="limit-width">
       <button ion-item detail-none (tap)="publish()">
-        Upload
+        {{ timeline.getTimelineID() < 0 ? "Upload" : "Update" }}
         <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
       </button>
     </ion-card>
+    <!--
+  <ng-container *ngIf="timeline.getTimelineID() < 0 ">
   </ng-container>
+-->
 
   <ion-card *ngIf="timeline.hasArtcodesShareUrl()" class="limit-width">
     <ion-item>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { NavController, LoadingController } from 'ionic-angular';
 
 import { ReceiveMethodSelectPage } from '../receive-method-select/receive-method-select';
@@ -14,6 +14,10 @@ import { TimelineProvider } from '../../providers/timeline/timeline';
 
 import { ReceiveTimelineGiftPage } from '../receive-timeline-gift/receive-timeline-gift';
 
+
+import { GlobalUtils } from '../../objects/global-utils/global-utils';
+import { HybridHttpProvider } from '../../providers/hybrid-http/hybrid-http';
+
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
@@ -26,10 +30,11 @@ export class HomePage {
   constructor(
     public navCtrl: NavController,
     private timelineProvider: TimelineProvider,
-    public loadingCtrl: LoadingController
+    public loadingCtrl: LoadingController,
+    private http: HybridHttpProvider,
+    private zone: NgZone
   ) {
   }
-
 
   public ionViewDidLoad() {
     //Runs when the page has loaded. This event only happens once per page 
@@ -38,6 +43,38 @@ export class HomePage {
     // good place to put your setup code for the page.
     this.timelineProvider.getSentGifts().then((value)=>{ this.sent = value; });
     this.timelineProvider.getReceivedGifts().then((value)=>{ this.received = value; });
+
+    if (GlobalUtils.isWebBuild()) {
+      let url = window.location.toString();
+      if (url.lastIndexOf("?") >= 0 && url.lastIndexOf("hgid=")) {
+        this.zone.run(()=>{
+          this.webGiftIsAvailble = true;
+        });
+      }
+    }
+
+  }
+
+  private webGiftIsAvailble = false;
+  private webLoadingScreen = null;
+  private isWebBuild = GlobalUtils.isWebBuild(); // Can't access directly from html template.
+  private loadWebGift() {
+    if (GlobalUtils.isWebBuild()) {
+      let url = window.location.toString();
+      if (url.lastIndexOf("?") >= 0 && url.lastIndexOf("hgid=")) {
+        ReceiveMethodSelectPage.OpenTimelineGift(
+          url, 
+          "", 
+          ()=>{if (this.webLoadingScreen==null) this.webLoadingScreen = this.loadingCtrl.create({"content":"Please wait..."}); this.webLoadingScreen.present();}, 
+          (msg:string)=>{this.zone.run(()=>{ this.webLoadingScreen.setContent(msg); });},
+          ()=>{this.webLoadingScreen.dismiss()},
+          this.http,
+          this.timelineProvider,
+          this.navCtrl,
+          "1"
+        );
+      }
+    }
   }
   public ionViewWillEnter() { 
     // Runs when the page is about to enter and become the active page.
@@ -85,15 +122,17 @@ export class HomePage {
     } else {
       let loading = this.loadingCtrl.create({content: 'Checking for updates...'});
       loading.present();
+      var updatedTimeline = null;
       this.timelineProvider.checkServerForUpdate(giftData).then((timeline)=>{
-        this.timelineProvider.saveTimeline(timeline).then(()=>{
-          loading.dismiss();
-          this.navCtrl.push(MakeTimelineGiftPage, { "timeline": timeline });
-        }).catch((reason)=>{
-          loading.dismiss();
-          console.error("Error while attempting to save updated timeline.", [reason]);
-          this.navCtrl.push(MakeTimelineGiftPage, { "timeline": timeline });
-        });
+        updatedTimeline = timeline;
+        return this.timelineProvider.saveTimeline(timeline);
+      }).then(()=>{
+        loading.dismiss();
+        this.navCtrl.push(MakeTimelineGiftPage, { "timeline": updatedTimeline });
+      }).catch((reason)=>{
+        loading.dismiss();
+        console.error("Error while attempting to save updated timeline.", reason);
+        this.navCtrl.push(MakeTimelineGiftPage, { "timeline": giftData });
       });
     }
   }
@@ -101,7 +140,22 @@ export class HomePage {
   private openReceiveGift(giftData) {
     console.log("openReceiveGift("+JSON.stringify(giftData)+")");
 
-    this.navCtrl.push(ReceiveTimelineGiftPage, { "timeline": giftData });
+    //this.navCtrl.push(ReceiveTimelineGiftPage, { "timeline": giftData });
+
+    let loading = this.loadingCtrl.create({content: 'Checking for updates...'});
+    loading.present();
+    var updatedTimeline = null;
+    this.timelineProvider.checkServerForUpdate(giftData).then((timeline)=>{
+      updatedTimeline = timeline;
+      return this.timelineProvider.saveTimeline(timeline)
+    }).then(()=>{
+      loading.dismiss();
+      this.navCtrl.push(ReceiveTimelineGiftPage, { "timeline": updatedTimeline });
+    }).catch((reason)=>{
+      loading.dismiss();
+      console.error("Error while attempting to save updated timeline.", reason);
+      this.navCtrl.push(ReceiveTimelineGiftPage, { "timeline": giftData });
+    });
   }
 
 

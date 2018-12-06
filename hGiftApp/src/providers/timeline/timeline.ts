@@ -13,6 +13,7 @@ import { Base64 } from 'js-base64';
 
 import { File, FileEntry } from '@ionic-native/file';
 import { Platform } from 'ionic-angular';
+import { GlobalUtils } from '../../objects/global-utils/global-utils';
 
 /*
   Generated class for the TimelineProvider provider.
@@ -395,10 +396,15 @@ export class TimelineProvider {
     return new Promise<TimelineEntry>((resolve, reject)=>{
       this.storage.get(key).then((value)=>{
         console.log("Storage result for [" + key + "] = "+value);
+
+        var entry: TimelineEntry = null;
         if (value != null) {
           console.log("Using storage value.");
           let jsonObj = JSON.parse(value);
-          let entry = new TimelineEntry(jsonObj, id.getTimelineId());
+          entry = new TimelineEntry(jsonObj, id.getTimelineId());
+        }
+
+        if (entry!=null && (entry.getLocalContentURI()!="" || entry.getMimeType()=="text/plain")) {
           resolve(entry);
         } else {
           console.log("Downloading...");
@@ -469,12 +475,16 @@ export class TimelineProvider {
             console.log(reason);
           });
         } else {
-          this.http.get("https://www.artcodes.co.uk/static/hg/mirroronly.php?uri=https://development.timeline.chronicle.horizon.ac.uk/api/v1/timeline/"+id.getTimelineId()+"/entry/"+id.getID()+"/content").then((value)=>{
+          this.http.get(
+            "https://www.artcodes.co.uk/static/hg/mirroronly.php?uri=https://development.timeline.chronicle.horizon.ac.uk/api/v1/timeline/"+id.getTimelineId()+"/entry/"+id.getID()+"/content",
+            {},
+            mimeType=="text/plain" ? "text" : "base64"
+          ).then((value)=>{
             if (value['code'] == 200) {
               // update entry
               var base64uri: string;
               if (mimeType=="text/plain") {
-                console.log(mimeType+"using Base64.encode");
+                console.log(mimeType+" using Base64.encode");
                 base64uri = "data:"+mimeType+";base64," + Base64.encode(value['body']);
               } else if (value.hasOwnProperty('base64')) {
                 console.log(mimeType+" using value['base64']");
@@ -501,9 +511,19 @@ export class TimelineProvider {
     return new Promise<any>((resolve, reject)=>{
       let key = TimelineProvider.KEY_hg_timeline_prefix + entry.getId().getTimelineId() + 
         TimelineProvider.KEY_hg_entry_prefix + entry.getId().getID();
+
+      var jsonToStore = JSON.stringify(entry.getData());
+
+      if (GlobalUtils.isWebBuild() && entry.getMimeType() != "text/plain") {
+        // don't save entry content if running as a website as local storage is limited to 5MB
+        var temp = JSON.parse(jsonToStore);
+        temp["localContentURI"] = "";
+        jsonToStore = JSON.stringify(temp);
+      }
+
       this.storage.set(
         key,
-        JSON.stringify(entry.getData())
+        jsonToStore
       ).then((value)=>{ 
         resolve(); 
       }).catch((reason)=>{
@@ -535,7 +555,7 @@ export class TimelineProvider {
       JSON.stringify(requestBody)
     ).then((value)=>{
       let serverResponce = typeof value['body'] == "string" ? JSON.parse(value['body']) : value['body'];
-      if (value['code'] == 201 && serverResponce['id']) {
+      if ((value['code'] == 201 || (GlobalUtils.isWebBuild() && value['code'] == 200)) && serverResponce['id']) {
         let remoteId = serverResponce['id'];
         this.zone.run(()=>{
           entry.getId().setPublishedID(remoteId);
@@ -666,6 +686,7 @@ export class TimelineProvider {
    * @param filePath 
    */
   public replaceFilePathVariables(filePath: string): string {
+    if (filePath.startsWith("data:")) return filePath;
     var result: string = ""+filePath;
     result = result.replace(TimelineProvider.FILE_PATH_APP_DIR, this.file.dataDirectory);
     result = result.replace("file://", "");
@@ -677,6 +698,7 @@ export class TimelineProvider {
    * @param filePath 
    */
   public addFilePathVariables(filePath: string): string {
+    if (filePath.startsWith("data:")) return filePath;
     var result: string = ""+filePath;
     result = result.replace(this.file.dataDirectory, TimelineProvider.FILE_PATH_APP_DIR);
     result = result.replace("file://", "");

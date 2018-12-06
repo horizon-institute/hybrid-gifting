@@ -1,5 +1,19 @@
 page-home {
 
+    div#hg-logo {
+        width: 10em;
+        height: 10em;
+        border-radius: 2em;
+        display: block;
+        margin-left: auto; margin-right: auto;
+        /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#acc274+0,f6a665+100 */
+background: rgb(172,194,116); /* Old browsers */
+background: -moz-linear-gradient(-45deg, rgba(172,194,116,1) 0%, rgba(246,166,101,1) 100%); /* FF3.6-15 */
+background: -webkit-linear-gradient(-45deg, rgba(172,194,116,1) 0%,rgba(246,166,101,1) 100%); /* Chrome10-25,Safari5.1-6 */
+background: linear-gradient(135deg, rgba(172,194,116,1) 0%,rgba(246,166,101,1) 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#acc274', endColorstr='#f6a665',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+    }
+
 
     div.toolbar-background {
         /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#abc370+0,f8a65f+100 */

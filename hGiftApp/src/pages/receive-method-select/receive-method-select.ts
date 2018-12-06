@@ -221,21 +221,45 @@ export class ReceiveMethodSelectPage {
     alert.present();
   }
 
+
   public openTimelineGift(uri: string, linkType: string) {
+    ReceiveMethodSelectPage.OpenTimelineGift(
+      uri, 
+      linkType, 
+      this.showTaskLoadingScreen, 
+      this.setTaskLoadingScreenMessage,
+      this.hideTaskLoadingScreen,
+      this.http,
+      this.timelineProvider,
+      this.navCtrl,
+      this.clientID
+    );
+  }
+  public static OpenTimelineGift(
+    uri: string, 
+    linkType: string,
+    showLoadingScreen: ()=>void,
+    setLoadingScreenMessage: (message:string)=>void,
+    hideLoadingScreen: ()=>void,
+    http: HybridHttpProvider,
+    timelineProvider: TimelineProvider,
+    navCtrl: NavController,
+    clientID: string
+  ) {
     console.log("openTimelineGift("+uri+","+linkType+")");
-    this.showTaskLoadingScreen();
+    showLoadingScreen();
     var timelineFound: Timeline = null;
     // TODO: get timeline id from HG server
     let linkUrl = TimelineEntry.removeHash(uri);
-    this.setTaskLoadingScreenMessage("Getting timeline ID...");
-    this.http.get("https://www.artcodes.co.uk/wp-admin/admin-ajax.php?action=hg_mirror_get_timeline_id&hgid="+encodeURIComponent(linkUrl)+"&hghash="+encodeURIComponent(""+Math.floor((Math.random() * 1000000) + 1))+"&client_id="+encodeURIComponent(this.clientID)).then((value)=>{
+    setLoadingScreenMessage("Getting timeline ID...");
+    http.get("https://www.artcodes.co.uk/wp-admin/admin-ajax.php?action=hg_mirror_get_timeline_id&hgid="+encodeURIComponent(linkUrl)+"&hghash="+encodeURIComponent(""+Math.floor((Math.random() * 1000000) + 1))+"&client_id="+encodeURIComponent(clientID)).then((value)=>{
       if (value['code']==200) {
         var body = typeof value['body'] == "string" ? JSON.parse(value['body']) : value['body'];
         if (body.hasOwnProperty("timeline_id")) {
           let timelineID = parseInt(body['timeline_id']);
           console.log("link resolved to timeline id "+timelineID);
-          this.setTaskLoadingScreenMessage("Loading timeline...");
-          return this.timelineProvider.getTimeline(timelineID);
+          setLoadingScreenMessage("Loading timeline...");
+          return timelineProvider.getTimeline(timelineID);
         } else {
           throw("This link does not appear to be linked to a physical gift.");
         }
@@ -246,21 +270,21 @@ export class ReceiveMethodSelectPage {
       console.log("Timeline loaded");
       timelineFound = timeline;
 
-      this.setTaskLoadingScreenMessage("Adding to received gifts...");
-      return this.timelineProvider.addTimelineToReceivedGifts(timeline);
+      setLoadingScreenMessage("Adding to received gifts...");
+      return timelineProvider.addTimelineToReceivedGifts(timeline);
     }).then(()=>{
       console.log("Timeline added to received gifts");
-      let timelineEntry = TimelineEntry.createRevealLinkEntry(timelineFound.getTimelineID(), this.clientID, linkUrl, linkType);
+      let timelineEntry = TimelineEntry.createRevealLinkEntry(timelineFound.getTimelineID(), clientID, linkUrl, linkType);
 
-      this.hideTaskLoadingScreen();
+      hideLoadingScreen();
       if (linkType=="artcodes") {
-        this.navCtrl.push(ReceiveTimelineGiftPage, { "timeline": timelineFound });
+        navCtrl.push(ReceiveTimelineGiftPage, { "timeline": timelineFound });
       } else {
-        this.navCtrl.push(ReceiveTimelineGiftPage, { "timeline": timelineFound, "reveal": timelineEntry });
+        navCtrl.push(ReceiveTimelineGiftPage, { "timeline": timelineFound, "reveal": timelineEntry });
       }
     }).catch((reason)=>{
-      this.hideTaskLoadingScreen();
-      console.log("reason");
+      hideLoadingScreen();
+      console.log(reason);
       alert(reason);
     });
 
