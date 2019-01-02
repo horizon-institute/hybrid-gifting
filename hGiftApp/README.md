@@ -8,6 +8,10 @@ Timelines and timeline entries are stored locally as JSON in a key/value storage
 The JSON schema is the same as on the Chronicle server except with additional local storage only fields. 
 Timeline entry content can either be stored inline as a base64 uri (text or images to be uploaded) or as a file (images downloaded).
 
+For the website version content is always stored as a base64 uri but the field is not saved to local storage; it is downloaded every time.
+
+Timelines and timeline entries are stored with temporary IDs before they are uploaded to Chronicle (negative numbers and UUIDs respectively). When uploaded these are swaped for the IDs Chronicle uses.
+
 ## Plugins
 
 This app uses a number of plugins for functionality:
