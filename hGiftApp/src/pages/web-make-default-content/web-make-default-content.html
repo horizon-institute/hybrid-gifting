@@ -1,0 +1,72 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Default Content</ion-title>
+    <ion-buttons end>
+        <button ion-button icon-only (click)="closeModal()">
+            <ion-icon item-right name="ios-close-outline"></ion-icon>
+        </button>
+    </ion-buttons>
+  </ion-navbar>
+
+</ion-header>
+
+<ion-content padding>
+
+  <p style="text-align: center;">Here you can add media to your default content.</p>
+
+  <ng-container>
+    <ion-card>
+      <!-- Header -->
+      <ion-item>
+        <ion-avatar item-start>
+          <!--<img item-start style="border-radius: 0%;" src="assets/imgs/example-qrcode.png"/>-->
+        </ion-avatar>
+        Default Content
+      </ion-item>
+
+      <!-- Content -->
+      <ng-container *ngFor="let contentEntry of timelineEntries">
+        <ion-item *ngIf="contentEntry.getMetadata('hg_entry_type') != 'link' && contentEntry.getMetadata('hg_link_uri') == '?default'">
+          <img *ngIf="contentEntry.getMetadata('hg_entry_type') == 'image'" class="timeline-entry-image" src="{{ timelineProvider.replaceFilePathVariablesForDisplay(contentEntry.getLocalContentURI()) }}"/>
+          <p   *ngIf="contentEntry.getMetadata('hg_entry_type') == 'text'"  class="timeline-entry-text" [style.font-size.%]="fontStyleForText(decodeBase64TextURI(contentEntry.getLocalContentURI()))" >{{ decodeBase64TextURI(contentEntry.getLocalContentURI()) }}</p>
+          <p   *ngIf="contentEntry.getMetadata('hg_entry_type') == 'url'"   class="timeline-entry-url" >{{contentEntry.getMetadata('title')}}<br><a href="#" (tap)="openUrl(decodeBase64TextURI(contentEntry.getLocalContentURI()))">{{ decodeBase64TextURI(contentEntry.getLocalContentURI()) }}</a></p>
+          <button ion-button outline item-end *ngIf="contentEntry.getId().isLocal()" (tap)="removeContent(contentEntry.getId())">
+            Remove
+          </button>
+        </ion-item>
+      </ng-container>
+
+      <!-- Actions (add content) -->
+      <ion-list>
+        <button ion-item detail-none (tap)="addContent('?default', 'text')">
+          Add text
+          <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+        </button>
+        <button ion-item detail-none (tap)="addContent('?default', 'image')">
+          Add photo
+          <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+        </button>
+        <button ion-item detail-none (tap)="addContent('?default', 'url')">
+          Add link
+          <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+        </button>
+      </ion-list>
+
+    </ion-card>
+  </ng-container>
+
+
+
+  <ng-container *ngIf="timelineEntries.length > 0 && containsUnpublishedData">
+    <p style="text-align: center;">Note: you can't remove content after uploading!</p>
+    
+    <ion-card class="limit-width">
+      <button ion-item detail-none (tap)="publish()">
+        Upload changes
+        <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
+      </button>
+    </ion-card>
+  </ng-container>
+
+</ion-content>

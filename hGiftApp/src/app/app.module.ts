@@ -39,6 +39,14 @@ import { File } from '@ionic-native/file';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { ImageEntryViewPage } from '../pages/image-entry-view/image-entry-view';
 
+import { GiftNamesProvider } from '../providers/gift-names/gift-names';
+
+import { ArtcodesProvider } from '../providers/artcodes/artcodes';
+import { WebVendorHomePage } from '../pages/web-vendor-home/web-vendor-home';
+import { WebCreateIdPage } from '../pages/web-create-id/web-create-id';
+import { WebViewIdsPage } from '../pages/web-view-ids/web-view-ids';
+import { WebMakeDefaultContentPage } from '../pages/web-make-default-content/web-make-default-content';
+
 @NgModule({
   declarations: [
     MyApp,
@@ -50,7 +58,11 @@ import { ImageEntryViewPage } from '../pages/image-entry-view/image-entry-view';
     MakeLinkMethodSelectPage,
     ReceiveTimelineGiftPage,
     QrCodeScannerPage,
-    ImageEntryViewPage
+    ImageEntryViewPage,
+    WebVendorHomePage,
+    WebCreateIdPage,
+    WebViewIdsPage,
+    WebMakeDefaultContentPage
   ],
   imports: [
     BrowserModule,
@@ -69,7 +81,11 @@ import { ImageEntryViewPage } from '../pages/image-entry-view/image-entry-view';
     MakeLinkMethodSelectPage,
     ReceiveTimelineGiftPage,
     QrCodeScannerPage,
-    ImageEntryViewPage
+    ImageEntryViewPage,
+    WebVendorHomePage,
+    WebCreateIdPage,
+    WebViewIdsPage,
+    WebMakeDefaultContentPage
   ],
   providers: [
     StatusBar,
@@ -84,7 +100,9 @@ import { ImageEntryViewPage } from '../pages/image-entry-view/image-entry-view';
     HTTP,
     HybridHttpProvider,
     InAppBrowser,
-    File
+    File,
+    GiftNamesProvider,
+    ArtcodesProvider
   ]
 })
 export class AppModule {}

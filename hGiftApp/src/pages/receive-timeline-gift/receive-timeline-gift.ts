@@ -18,6 +18,8 @@ import { UserIdProvider } from '../../providers/user-id/user-id';
 import { InAppBrowser } from '@ionic-native/in-app-browser';
 import { ImageEntryViewPage } from '../image-entry-view/image-entry-view';
 import { GlobalUtils } from '../../objects/global-utils/global-utils';
+import { HybridHttpProvider } from '../../providers/hybrid-http/hybrid-http';
+import { ValueUnwrapper } from '@angular/core/src/change_detection/change_detection';
 
 // declare "Artcodes" so we can access the javascript object
 declare var Artcodes;
@@ -34,6 +36,10 @@ export class ReceiveTimelineGiftPage {
   private timeline: Timeline;
   private timelineEntries: TimelineEntry[] = [];
 
+
+  private defaultContentTimeline: Timeline = null;
+  private defaultContentTimelineEntries: TimelineEntry[] = [];
+
   private hasWritenThakyou = false;
   private clientId = "1";
 
@@ -45,7 +51,7 @@ export class ReceiveTimelineGiftPage {
   private toRevealArtcodes = 0;
 
   constructor(
-    public navCtrl: NavController, 
+    public navCtrl: NavController,
     public navParams: NavParams,
     private nfc: NFC, private ndef: Ndef,
     private zone: NgZone,
@@ -53,102 +59,114 @@ export class ReceiveTimelineGiftPage {
     private timelineProvider: TimelineProvider,
     private userIdProvider: UserIdProvider,
     private iab: InAppBrowser,
-    private loadingCtrl: LoadingController
+    private loadingCtrl: LoadingController,
+    private http: HybridHttpProvider
   ) {
-    userIdProvider.getUserId().then((userId)=>{ this.clientId = userId});
+    userIdProvider.getUserId().then((userId)=>{
 
-    this.timeline = this.navParams.get("timeline");
+      this.clientId = userId;
 
-    let revealEntry: TimelineEntry = this.navParams.get("reveal");
+      this.timeline = this.navParams.get("timeline");
 
-
-    let ids: TimelineEntryId[] = [];
-    for (var i=0; i<this.timeline.getNumberOfEntries(); ++i) {
-      ids.push(this.timeline.getEntryId(i));
-    }
-
-    console.log(ids.length + " IDs");
-    console.log(ids);
-
-
-    let loading = this.loadingCtrl.create({content:"Loading..."});
-    loading.present();
-    console.log("before promise");
-    Promise.all(
-      ids.map((id)=>{return this.timelineProvider.getTimelineEntry(id)})
-    ).then((timelineEntries)=>{
-      console.log("before then");
-      console.log("loaded "+timelineEntries.length + " entries from "+ids.length+" IDs");
-
-      for (var i=0; i<this.timelineEntries.length; ++i) {
-        console.log(this.timelineEntries[i].getMimeType());
+      let revealEntry: TimelineEntry = this.navParams.get("reveal");
+      if (revealEntry != null) {
+        revealEntry.addMetadata(TimelineEntry.METADATA_KEY_USER_ID, this.clientId);
       }
 
-      this.zone.run(()=>{
-        this.timelineEntries = timelineEntries;
-        for (var i=0; i<this.timelineEntries.length; ++i) {
-          let entry = this.timelineEntries[i];
-          if (entry.isLink()) {
-            if (entry.isArtcode()) {
-              ++this.toRevealArtcodes;
-            } else if (entry.isQR()) {
-              ++this.toRevealQRCodes;
-            } else if (entry.isNFC()) {
-              ++this.toRevealNFCTags;
-            }
-          } else if (entry.isReveal()) {
-            if (entry.isArtcode()) {
-              --this.toRevealArtcodes;
-            } else if (entry.isQR()) {
-              --this.toRevealQRCodes;
-            } else if (entry.isNFC()) {
-              --this.toRevealNFCTags;
-            }
-          } else if (entry.isThankYouNote() && entry.getUserId()==this.clientId) {
-            this.hasWritenThakyou = true;
-          }
-        }
-      });
+
+      let ids: TimelineEntryId[] = [];
+      for (var i=0; i<this.timeline.getNumberOfEntries(); ++i) {
+        ids.push(this.timeline.getEntryId(i));
+      }
+
+      console.log(ids.length + " IDs");
+      console.log(ids);
 
 
-      if (revealEntry != null) {
-        var alreadyRevealed = false;
-        for (var i=0; i<this.timelineEntries.length; ++i) {
-          let entry = this.timelineEntries[i];
-          if (
-            entry.isReveal() && 
-            entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI) == revealEntry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI) &&
-            entry.getUserId() == revealEntry.getUserId()
-          ) {
-            alreadyRevealed = true;
-            break;
-          }
-        }
+      let loading = this.loadingCtrl.create({content:"Loading..."});
+      loading.present();
+      console.log("before promise");
+      Promise.all(
+        ids.map((id)=>{return this.timelineProvider.getTimelineEntry(id)})
+      ).then((timelineEntries)=>{
+        console.log("before then");
+        console.log("loaded "+timelineEntries.length + " entries from "+ids.length+" IDs");
 
-        // add reveal link type if not known (e.g a web event)
-        if (revealEntry.getMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE) == "") {
+
+        timelineEntries = timelineEntries.sort((a, b)=>{return (new Date(a.getCreatedAt()).getTime()) - (new Date(b.getCreatedAt()).getTime());});
+
+        this.zone.run(()=>{
+          this.timelineEntries = timelineEntries;
           for (var i=0; i<this.timelineEntries.length; ++i) {
             let entry = this.timelineEntries[i];
-            if (entry.isLink() && entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI) == revealEntry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI)) {
-              console.log("Setting revealEntry link type to "+entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE));
-              revealEntry.addMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE, entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE));
+            if (entry.isLink()) {
+              if (entry.isArtcode()) {
+                ++this.toRevealArtcodes;
+              } else if (entry.isQR()) {
+                ++this.toRevealQRCodes;
+              } else if (entry.isNFC()) {
+                ++this.toRevealNFCTags;
+              }
+            } else if (entry.isReveal()) {
+              if (entry.isArtcode()) {
+                --this.toRevealArtcodes;
+              } else if (entry.isQR()) {
+                --this.toRevealQRCodes;
+              } else if (entry.isNFC()) {
+                --this.toRevealNFCTags;
+              }
+            } else if (entry.isThankYouNote() && entry.getUserId()==this.clientId) {
+              this.hasWritenThakyou = true;
             }
+          }
+        });
+
+
+        if (revealEntry != null) {
+          var alreadyRevealed = false;
+          for (var i=0; i<this.timelineEntries.length; ++i) {
+            let entry = this.timelineEntries[i];
+            if (
+              entry.isReveal() &&
+              entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI) == revealEntry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI) &&
+              entry.getUserId() == revealEntry.getUserId()
+            ) {
+              alreadyRevealed = true;
+              break;
+            }
+          }
+
+          // add reveal link type if not known (e.g a web event)
+          if (revealEntry.getMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE) == "") {
+            for (var i=0; i<this.timelineEntries.length; ++i) {
+              let entry = this.timelineEntries[i];
+              if (entry.isLink() && entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI) == revealEntry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI)) {
+                console.log("Setting revealEntry link type to "+entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE));
+                revealEntry.addMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE, entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE));
+              }
+            }
+          }
+
+          if (!alreadyRevealed) {
+            this.pushRevealEntry(revealEntry);
           }
         }
 
-        if (!alreadyRevealed) {
-          this.pushRevealEntry(revealEntry);
-        }
-      }
+        this.checkForDefaultContent();
 
-      loading.dismiss();
+        loading.dismiss();
 
+      }).catch((reason)=>{
+        console.log("before catch");
+        alert("There was an error loading timeline entries. (1)");
+        console.log(reason);
+      });
+      console.log("after promise");
     }).catch((reason)=>{
-      console.log("before catch");
-      alert("There was an error loading timeline entries. (1)");
+      alert("There was an error loading timeline entries. (2)");
+      console.log("Failed to load user ID");
       console.log(reason);
     });
-    console.log("after promise");
 
   }
 
@@ -156,7 +174,7 @@ export class ReceiveTimelineGiftPage {
     console.log('ionViewDidLoad TimelineViewPage');
   }
 
-  public ionViewWillEnter() { 
+  public ionViewWillEnter() {
     // Runs when the page is about to enter and become the active page.
 
     this.nfcCheck();
@@ -178,7 +196,7 @@ export class ReceiveTimelineGiftPage {
     }
     return Base64.decode(uri);
   }
-  
+
   private fontStyleForText(text: string): number {
     let baseTextSize = 100.0;
     let maxChars = 30.0;
@@ -298,7 +316,7 @@ export class ReceiveTimelineGiftPage {
     scanExperience['pipeline'] = ["tile", "detect"];
     scanExperience['focusMode'] = "tapToFocus";
     scanExperience['requestedAutoFocusMode'] = "tapToFocus";
-    
+
     scanExperience['foregroundColor'] = "#FFFFFF";
     scanExperience['backgroundColor'] = "#3F4C6B";
     scanExperience['highlightBackgroundColor'] = "#FFFFFF";
@@ -306,12 +324,12 @@ export class ReceiveTimelineGiftPage {
     scanExperience['openWithoutUserInput'] = true;
     scanExperience['scanScreenTextTitle'] = "Scan the Artcode on your gift";
     scanExperience['scanScreenTextDesciption'] = "Tip: make sure the whole image is inside the screen below";
-    
+
     let fn = ()=>{
       try {
         // open Artcode scanner:
         Artcodes.scan(
-          scanExperience, 
+          scanExperience,
           function (code) { this_.handleArtcodeScanResult(code); }
         );
 
@@ -365,9 +383,9 @@ export class ReceiveTimelineGiftPage {
         let entry = this.timelineEntries[i];
         if (entry.isLink() && entry.isNFC()) {
           let revealEntry = TimelineEntry.createRevealLinkEntry(
-            this.timeline.getTimelineID(), 
-            this.clientId, 
-            entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI), 
+            this.timeline.getTimelineID(),
+            this.clientId,
+            entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI),
             entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE)
           );
 
@@ -396,7 +414,7 @@ export class ReceiveTimelineGiftPage {
         if (reason == "NO_NFC") {
           this.nfcIsSupported = this.nfcIsEnabled = false;
         } else if (reason == "NFC_DISABLED") {
-          this.nfcIsSupported = true; 
+          this.nfcIsSupported = true;
           this.nfcIsEnabled = false;
         } else {
           //alert("NFC is not available: "+JSON.stringify(reason));
@@ -497,13 +515,13 @@ export class ReceiveTimelineGiftPage {
       let entry = this.timelineEntries[i];
       if (entry.isLink() && entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE) == linkType) {
         if (
-          (linkType==TimelineEntry.LINK_TYPE_ARTCODE && uri == this.getArtcodeCodeFromUri(entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI))) || 
+          (linkType==TimelineEntry.LINK_TYPE_ARTCODE && uri == this.getArtcodeCodeFromUri(entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI))) ||
           (uri == entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI))
         ) {
           revealEntry = TimelineEntry.createRevealLinkEntry(
-            this.timeline.getTimelineID(), 
-            this.clientId, 
-            entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI), 
+            this.timeline.getTimelineID(),
+            this.clientId,
+            entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI),
             entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE)
           );
 
@@ -511,7 +529,7 @@ export class ReceiveTimelineGiftPage {
         }
       } else if (entry.isReveal() && entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE) == linkType) {
         if (
-          (linkType==TimelineEntry.LINK_TYPE_ARTCODE && uri == this.getArtcodeCodeFromUri(entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI))) || 
+          (linkType==TimelineEntry.LINK_TYPE_ARTCODE && uri == this.getArtcodeCodeFromUri(entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI))) ||
           (uri == entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI))
         ) {
           revealEntry = null;
@@ -534,4 +552,68 @@ export class ReceiveTimelineGiftPage {
   private openImage(entry: TimelineEntry) {
     ImageEntryViewPage.open(this.navCtrl, entry);
   }
+
+
+  private checkForDefaultContent() {
+
+    // gather link ids
+    let hgids: string[] = this.timelineEntries.filter((timelineEntry: TimelineEntry)=>{
+      return timelineEntry.isLink();
+    }).map((timelineEntry: TimelineEntry)=>{
+      return timelineEntry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI);
+    });
+    
+    console.log("DEFAULT_CONTENT: hgids = ["+hgids.join(", ")+"]");
+
+    // check server for default content assigned to link ids
+    Promise.all(
+      hgids.map((hgid: string)=>{
+        return this.http.get("https://www.artcodes.co.uk/wp-admin/admin-ajax.php?action=hg_mirror_get_default_timeline_for_hgid&hgid="+encodeURIComponent(hgid));
+      })
+    ).then((values: {}[])=>{
+
+      let default_content_timeline_ids: number[] = values.map((value)=>{
+        if (typeof value['body'] == "string") {
+          return JSON.parse(value['body']);
+        } else {
+          return value['body'];
+        }
+      }).filter((value)=>{
+        return "success" in value && value['success'] && "default_content_timeline_id" in value;
+      }).map((value: {})=>{
+        return value['default_content_timeline_id'];
+      }).filter((value)=>{
+        return value != null && value > 0;
+      });
+
+      console.log("DEFAULT_CONTENT: default_content_timeline_ids = ["+default_content_timeline_ids.join(", ")+"]");
+
+      // get default content timeline
+      if (default_content_timeline_ids.length > 0) {
+        this.timelineProvider.getTimeline(default_content_timeline_ids[0]).then((defaultContentTimeline: Timeline)=>{
+          Promise.all(
+            defaultContentTimeline.getEntryIds().map((id)=>{return this.timelineProvider.getTimelineEntry(id)})
+          ).then((defaultContentTimelineEntries)=>{
+            this.defaultContentTimeline = defaultContentTimeline;
+            this.zone.run(()=>{
+              this.defaultContentTimelineEntries = defaultContentTimelineEntries.sort((a, b)=>{return (new Date(a.getCreatedAt()).getTime()) - (new Date(b.getCreatedAt()).getTime());});
+            });
+          }).catch((reason)=>{
+            console.log("DEFAULT_CONTENT: Error loading timeline entries.");
+            console.log(reason);
+          });
+        }).catch((reason)=>{
+          console.log("DEFAULT_CONTENT: Error loading timeline.");
+          console.log(reason);
+        });
+      }
+
+
+    }).catch((reason)=>{
+      console.log("DEFAULT_CONTENT: Error loading timeline ids.");
+      console.log(reason);
+    });
+
+  }
+  
 }

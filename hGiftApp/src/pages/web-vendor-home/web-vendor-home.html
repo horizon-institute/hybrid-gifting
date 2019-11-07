@@ -1,0 +1,114 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>VENDOR HOME</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+
+  <div class="card-col-wrapper">
+    <div class="card-wrapper">
+      <ion-card>
+        <ion-card-content>
+        <p>
+          Using the <i>Hybrid Gifting</i> app users can use <i>Gift Creation Kits</i> to 
+          create personalised digital-physical gifts. <i>Gift Creation Kits</i> contain 
+          all the material to create a gift (or turn an existing physical gift into a 
+          hybrid digital-physical gift). This includes NFC tags and QR codes with 
+          preconfigured data and media provided by the manufacturer.
+        </p>
+        <p>
+          As a museum, gift shop, manufacture, or other vendor you can use this page to 
+          create this preconfigured data, <i>Gift URIs</i>, and upload this media, 
+          <i>Default Content</i>, to create your <i>Gift Creation Kits</i>.
+        </p>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <div class="card-col-wrapper">
+    <div class="card-wrapper">
+      <p *ngIf="loadingStatus=='loading'" style="color:white;text-align: center;width:100%;">Loading, please wait...</p>
+    </div>
+
+    <div class="card-wrapper">
+      <ion-card *ngIf="loadingStatus=='loggedout'">
+        <ion-card-header>Login</ion-card-header>
+        <ion-card-content>
+          <p>
+            You must be logged in to the artcodes.ac.uk website to use this page. Follow this link below then come back here.
+          </p>
+        </ion-card-content>
+        <button ion-item (tap)="login()">
+          <ion-icon name="contact" item-start></ion-icon>
+          Login at artcodes.co.uk
+        </button>
+      </ion-card>
+    </div>
+
+    <div class="card-wrapper">
+      <ion-card *ngIf="loadingStatus=='error'">
+        <ion-card-header>Error</ion-card-header>
+        <ion-card-content>
+          <p>
+            {{ errorMessage }}
+          </p>
+        </ion-card-content>
+        <button ion-item (tap)="loadUserObjects()">
+          <ion-icon name="refresh" item-start></ion-icon>
+          Retry
+        </button>
+      </ion-card>
+    </div>
+
+    <div class="card-wrapper">
+      <ion-card *ngIf="loadingStatus=='loggedin'">
+        <ion-card-header>Default Content</ion-card-header>
+        <ion-card-content>
+          <p>
+            <i>Default Content</i> is media that is automatically added to a gift when a user 
+            uses a specific QR code or NFC tag that you have assigned <i>Default Content</i> to.
+          </p>
+        </ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let item of defaultContent" (tap)="openDefaultContent(item['default_content_timeline_id'])">
+            <h3>{{ item['comment'] }}</h3>
+            <p>Created {{ item['date_created'] }}</p>
+          </ion-item>
+        </ion-list>
+        <button ion-item (tap)="createNewDefaultTimeline()">
+          <ion-icon name="add" item-start></ion-icon>
+          Create new
+        </button>
+      </ion-card>
+    </div> 
+
+    <div class="card-wrapper">
+      <ion-card *ngIf="loadingStatus=='loggedin'">
+        <ion-card-header>Gift URIs</ion-card-header>
+        <ion-card-content>
+          <p>
+            <i>Gift URIs</i> are the data you encode if the QR codes and NFC tags you include in your <i>Gift Creation Kits</i>.
+          </p>
+        </ion-card-content>
+        <ion-list>
+          <ion-item *ngFor="let item of giftUriGroupsList()" (tap)="viewGiftIdGroupWithKey(item['key'])">
+            <h3>{{ item['comment'] }}</h3>
+            <p>{{ item['size'] }} Gift URIs</p>
+            <p>Default Content: {{ getDefaultContentCommentFromTimelineID(item['default_content_timeline_id']) }}</p>
+            <p>Created {{ item['date_created'] }}</p>
+          </ion-item>
+        </ion-list>
+        <button ion-item full (tap)="createNewIds()">
+          <ion-icon name="add" item-start></ion-icon>
+          Create new
+        </button>
+      </ion-card>
+    </div>
+  </div>
+
+</ion-content>

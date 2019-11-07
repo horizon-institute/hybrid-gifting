@@ -24,16 +24,13 @@ import { GlobalUtils } from '../../objects/global-utils/global-utils';
 
 @IonicPage()
 @Component({
-  selector: 'make-timeline-gift',
-  templateUrl: 'make-timeline-gift.html',
+  selector: 'web-make-default-content',
+  templateUrl: 'web-make-default-content.html',
 })
-export class MakeTimelineGiftPage {
+export class WebMakeDefaultContentPage {
 
   private timeline: Timeline;
   private timelineEntries: TimelineEntry[] = [];
-
-  private defaultContentTimeline: Timeline = null;
-  private defaultContentTimelineEntries: TimelineEntry[] = [];
 
   private clientID: string = "1";
 
@@ -79,11 +76,9 @@ export class MakeTimelineGiftPage {
     Promise.all(ids.map((id)=>{return this.timelineProvider.getTimelineEntry(id)})).then((timelineEntries)=>{
       console.log("loaded "+timelineEntries.length + " entries from "+ids.length+" IDs");
 
-
       timelineEntries = timelineEntries.sort((a, b)=>{
         return (new Date(a.getCreatedAt()).getTime()) - (new Date(b.getCreatedAt()).getTime());
       });
-
 
       this.timelineEntries = timelineEntries;
 
@@ -101,8 +96,6 @@ export class MakeTimelineGiftPage {
           }
         }
       });
-
-      this.checkForDefaultContent();
     }).catch((reason)=>{
       alert("There was an error. (1)");
       console.log(reason);
@@ -183,7 +176,6 @@ export class MakeTimelineGiftPage {
             entry
           );
         });
-        this.checkForDefaultContent();
         if (this.shouldAddDefaultContent && !this.addedManufactureContent) {
           this.addedManufactureContent = true;
           this.pushContentEntry(TimelineEntry.createUrlEntry(this.timeline.getTimelineID(), this.clientID, entry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI), "https://debbiebryan.co.uk/artcodes/", "Debbie Bryan"));
@@ -218,73 +210,31 @@ export class MakeTimelineGiftPage {
       if (GlobalUtils.isWebBuild()) {
         this.removeAnyPreviousCordovaCameraSelectElement();
       }
-      //if (this.plt.is('ios') || this.plt.is('android')) {
-        eval('navigator.camera').getPicture((imageData)=>{
-          this.zone.run(()=>{
-            ++this.addContentCount;
-            this.pushContentEntry(
-              TimelineEntry.createImageEntry(
-                this.timeline.getTimelineID(), 
-                this.clientID, 
-                link, 
-                "data:image/jpeg;base64,"+imageData,
-                "image/jpeg"
-              )
-            );
-            //console.log({"imagedata":"data:image/jpeg;base64,"+imageData});
-          })
-        }, ()=>{/*errorCallback*/}, {
-          'sourceType':0,
-          'destinationType':0,
-          'targetWidth': 800,
-          'targetHeight': 800
-        });
-
-        if (GlobalUtils.isWebBuild()) {
-          this.autoClickCordovaCameraSelectElement();
-        }
-      //} 
-      /*else {
-        console.log('Error: Platform not recognised: '+this.plt.platforms().join(', '));
-      
-        this.imagePicker.getPictures({
-          maximumImagesCount: 1,
-          width: 800,
-          height: 800,
-          outputType:1
-        }).then((results) => {
-          for (var i = 0; i < results.length; i++) {
-            //console.log('Image URI: ' + results[i]);
-
-            this.zone.run(()=>{
-              ++this.addContentCount;
-              this.pushContentEntry(
-                TimelineEntry.createImageEntry(
-                  this.timeline.getTimelineID(), 
-                  this.clientID, 
-                  link, 
-                  "data:image/jpeg;base64,"+results[i],
-                  "image/jpeg"
-                )
-              );
-            });
-          }
-        }, (err) => {
-          alert("There was an error accessing this image. "+JSON.stringify(err));
-          console.log(err);
-        });
-
-        
-      }*/
-
-      /*
-      this.zone.run(()=>{
-        ++this.addContentCount;
-        this.pushContentEntry(
-          TimelineEntry.createImageEntry(this.timeline.getTimelineID(), "", link, "assets/imgs/placeholder"+(++this.debugPlaceholderImageCount%3+1)+".jpg")
-        );
+      eval('navigator.camera').getPicture((imageData)=>{
+        this.zone.run(()=>{
+          ++this.addContentCount;
+          this.pushContentEntry(
+            TimelineEntry.createImageEntry(
+              this.timeline.getTimelineID(), 
+              this.clientID, 
+              link, 
+              "data:image/jpeg;base64,"+imageData,
+              "image/jpeg"
+            )
+          );
+          //console.log({"imagedata":"data:image/jpeg;base64,"+imageData});
+        })
+      }, ()=>{/*errorCallback*/}, {
+        'sourceType':0,
+        'destinationType':0,
+        'targetWidth': 800,
+        'targetHeight': 800
       });
-      */
+
+      if (GlobalUtils.isWebBuild()) {
+        this.autoClickCordovaCameraSelectElement();
+      }
+
     } else if (contentType == "text") {
 
 
@@ -390,9 +340,10 @@ export class MakeTimelineGiftPage {
 
   private pushContentEntry(entry: TimelineEntry) {
     this.timelineProvider.addSaveTimelineEntry(this.timeline, entry).then(()=>{
+      console.log("Adding entry to timelineEntries / containsUnpublishedData = true...");
       this.zone.run(()=>{
         this.timelineEntries.push(entry);
-        this.containsUnpublishedData = true;
+        this.containsUnpublishedData =true;
       });
     }).catch((reason)=>{
       console.log("Error adding content to timeline: "+JSON.stringify(reason));
@@ -709,68 +660,7 @@ export class MakeTimelineGiftPage {
   }
 
 
-
-
-  private checkForDefaultContent() {
-
-    // gather link ids
-    let hgids: string[] = this.timelineEntries.filter((timelineEntry: TimelineEntry)=>{
-      return timelineEntry.isLink();
-    }).map((timelineEntry: TimelineEntry)=>{
-      return timelineEntry.getMetadata(TimelineEntry.METADATA_KEY_LINK_URI);
-    });
-    
-    console.log("DEFAULT_CONTENT: hgids = ["+hgids.join(", ")+"]");
-
-    // check server for default content assigned to link ids
-    Promise.all(
-      hgids.map((hgid: string)=>{
-        return this.http.get("https://www.artcodes.co.uk/wp-admin/admin-ajax.php?action=hg_mirror_get_default_timeline_for_hgid&hgid="+encodeURIComponent(hgid));
-      })
-    ).then((values: {}[])=>{
-
-      let default_content_timeline_ids: number[] = values.map((value)=>{
-        if (typeof value['body'] == "string") {
-          return JSON.parse(value['body']);
-        } else {
-          return value['body'];
-        }
-      }).filter((value)=>{
-        return "success" in value && value['success'] && "default_content_timeline_id" in value;
-      }).map((value: {})=>{
-        return value['default_content_timeline_id'];
-      }).filter((value)=>{
-        return value != null && value > 0;
-      });
-
-      console.log("DEFAULT_CONTENT: default_content_timeline_ids = ["+default_content_timeline_ids.join(", ")+"]");
-
-      // get default content timeline
-      if (default_content_timeline_ids.length > 0) {
-        this.timelineProvider.getTimeline(default_content_timeline_ids[0]).then((defaultContentTimeline: Timeline)=>{
-          Promise.all(
-            defaultContentTimeline.getEntryIds().map((id)=>{return this.timelineProvider.getTimelineEntry(id)})
-          ).then((defaultContentTimelineEntries)=>{
-            this.defaultContentTimeline = defaultContentTimeline;
-            this.zone.run(()=>{
-              this.defaultContentTimelineEntries = defaultContentTimelineEntries.sort((a, b)=>{return (new Date(a.getCreatedAt()).getTime()) - (new Date(b.getCreatedAt()).getTime());});
-            });
-          }).catch((reason)=>{
-            console.log("DEFAULT_CONTENT: Error loading timeline entries.");
-            console.log(reason);
-          });
-        }).catch((reason)=>{
-          console.log("DEFAULT_CONTENT: Error loading timeline.");
-          console.log(reason);
-        });
-      }
-
-
-    }).catch((reason)=>{
-      console.log("DEFAULT_CONTENT: Error loading timeline ids.");
-      console.log(reason);
-    });
-
+  private closeModal() {
+    this.navCtrl.pop();
   }
-
 }

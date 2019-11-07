@@ -27,9 +27,11 @@
     <div showWhen="ios">
         <p style="text-align: center;"><a href="https://testflight.apple.com/join/m0YFL47n" style="color:white; border: 1px solid white; border-radius: 3px; text-decoration: none; padding: 0.2em 1em;">Join the iOS beta, tap here.</a></p>
     </div>
-    <div *ngIf="webGiftIsAvailble" style="margin: 4em 0em;">
+    
+    <div *ngIf="webGiftIsAvailble && !autoOpenWebGift" style="margin: 4em 0em;">
       <p style="text-align: center;"><span (tap)="loadWebGift()"  style="color:white; border: 1px solid white; border-radius: 3px; text-decoration: none; padding: 0.2em 1em;">View gift in web app</span></p>
     </div>
+
   </ng-container>
 
   <ng-container *ngIf="!isWebBuild">
@@ -56,7 +58,12 @@
         </ion-item>
         <ion-item-sliding *ngFor="let item of sent">
           <button ion-item detail-none  (tap)="openSentGift(item)">
-            {{ item.getTimelineID() < 0 ? "Unsent" : "Sent" }} Gift #{{ item.getTimelineID() }}
+              <ng-container *ngIf="!cachedGiftNamesMap.hasOwnProperty(item.getTimelineID()) || cachedGiftNamesMap[item.getTimelineID()]==''">
+                {{ item.getTimelineID() < 0 ? "Unsent" : "Sent" }} Gift #{{ item.getTimelineID() }}
+              </ng-container>
+              <ng-container *ngIf="cachedGiftNamesMap.hasOwnProperty(item.getTimelineID()) && cachedGiftNamesMap[item.getTimelineID()]!=''">
+                {{ cachedGiftNamesMap[item.getTimelineID()] }} ({{ item.getTimelineID() < 0 ? "Unsent" : "Sent" }} #{{ item.getTimelineID() }})
+              </ng-container>
             <ion-icon item-end name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
           </button>
           <ion-item-options side="right">
@@ -91,7 +98,7 @@
         <div class="card-subtitle">Received a gift? Access its digital content here!</div>
       </div>
       <button ion-button clear small color="light">
-        Access digital content 
+        Access digital content
         <ion-icon name="arrow-dropright-circle" style="padding-left: 0.2em;"></ion-icon>
       </button>
     </div>
@@ -109,6 +116,10 @@
             <ion-icon name="remove-circle"></ion-icon>
             Delete
           </button>
+          <button ion-button color="default" (tap)="debugRawTimelineView(item)">
+            <ion-icon name="bug"></ion-icon>
+            Debug view
+          </button>
           <!--
           <button ion-button color="default" (tap)="debugDeleteFromReceivedList(item)">
             <ion-icon name="bug"></ion-icon>
@@ -119,6 +130,13 @@
       </ion-item-sliding>
     </ion-list>
   </ion-card>
+
+
+  <div (tap)="openVendorHome()" id="vendor-banner" *ngIf="isWebBuild">
+    <h3>Museum, gift shop, craft store? This app supports vendors!</h3>
+    <p>Looking to put together kits your customers can use to create digital-physical gifts? Click here.</p>
+  </div>
+  
 <!--
   <button ion-button (tap)="addTimeline3()">DEBUG: add timeline 3</button>
   <button ion-button (tap)="testUploadTimeline()">DEBUG: Create new timeline</button>

@@ -1,4 +1,20 @@
 page-home {
+    #vendor-banner {
+        border: 1px solid white;
+        border-radius: 1em;
+        color: black;
+        background-color: white;
+        max-width: 300px;
+        margin: auto;
+        padding: 1em 1em 0.1em 1em;
+        cursor: pointer;
+    }
+    #vendor-banner h3 {
+        font-size: 12pt;
+    }
+    #vendor-banner p {
+        font-size: 10pt;
+    }
 
     div#hg-logo {
         width: 10em;

@@ -1,0 +1,44 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>{{ giftURIs.length == 0 ? "" : giftURIs[0]['comment'] }}</ion-title>
+    <ion-buttons end>
+        <button ion-button icon-only (click)="closeModal()">
+            <ion-icon item-right name="ios-close-outline"></ion-icon>
+        </button>
+    </ion-buttons>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+
+
+
+  <ion-card>
+    <ion-card-header>Gift URIs</ion-card-header>
+    <ion-card-content>
+      <p>
+        You can use these Gift URIs with the Hybrid Gifting app. To use them you need to 
+        encode these as URLs in QR codes and NFC tags.
+      </p>
+      <p>
+        You can find many QR code generators 
+        on the internet that will provide the QR codes as images yo can then print on 
+        your media, e.g. stickers. If you have many QR codes to make look to batch functions.
+      </p>
+      <p>
+        There are many apps on Google Play you can use to encode NFC tags.
+        The Gift URIs should be encoded as NDEF URLs.
+      </p>
+    </ion-card-content>
+  </ion-card>
+
+  <ion-card>
+    <textarea id="hgids-textarea" style="width:100%; height: 12em;"></textarea>
+  </ion-card>
+
+</ion-content>
+
+

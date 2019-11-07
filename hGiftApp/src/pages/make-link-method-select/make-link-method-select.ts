@@ -4,10 +4,7 @@ import { IonicPage, NavController, NavParams, AlertController, Platform } from '
 import { NFC, Ndef, NdefTag, NdefRecord } from '@ionic-native/nfc';
 import { Subscription } from 'rxjs/Subscription';
 import { QrCodeScannerPage } from '../qr-code-scanner/qr-code-scanner';
-
-// declare "Artcodes" so we can access the javascript object
-declare var Artcodes;
-
+import { ArtcodesProvider } from '../../providers/artcodes/artcodes';
 
 @IonicPage()
 @Component({
@@ -24,7 +21,8 @@ export class MakeLinkMethodSelectPage {
     private nfc: NFC, private ndef: Ndef,
     private zone: NgZone,
     private alertCtrl: AlertController,
-    public plt: Platform
+    public plt: Platform,
+    private artcodes: ArtcodesProvider
   ) {
     this.callback = this.navParams.get('callback');
   }
@@ -59,7 +57,8 @@ export class MakeLinkMethodSelectPage {
       inputs: [
         {
           name: 'code',
-          placeholder: 'e.g. 11244'
+          placeholder: 'e.g. 11244',
+          type: 'number'
         }
       ],
       buttons: [
@@ -111,49 +110,11 @@ export class MakeLinkMethodSelectPage {
     scanExperience['scanScreenTextTitle'] = "Try scanning your Artcode";
     scanExperience['scanScreenTextDesciption'] = "Tip: make sure the whole image is inside the screen below";
     
-    let fn = ()=>{
-      try {
-        // open Artcode scanner:
-        Artcodes.scan(
-          scanExperience, 
-          function (code) { this_.handleArtcodeScanResult(code); }
-        );
-
-      } catch (err) {
-        // if Artcode plugin is not available (e.g. web browser debugging) show dialog for manual code entry:
-        console.log("Artcodes failed.",[err]);
-        let alert = this.alertCtrl.create({
-          title: 'Artcodes error',
-          inputs: [
-            {
-              name: 'code',
-              placeholder: 'Code'
-            }
-          ],
-          buttons: [
-            {
-              text: 'Cancel',
-              role: 'cancel',
-              handler: data => {
-                this.handleArtcodeScanResult("BACK");
-              }
-            },
-            {
-              text: 'Continue',
-              handler: data => {
-                var code: string = data['code'];
-                if (code.indexOf(':') < 0) {
-                  code = code.split('').join(':');
-                }
-                this.handleArtcodeScanResult(code);
-              }
-            }
-          ]
-        });
-        alert.present();
-      }
-    };
-    fn();
+    this.artcodes.scan(
+      scanExperience, 
+      (code: string)=>{ this.handleArtcodeScanResult(code) },
+      ()=>{ this.handleArtcodeScanResult(null) }
+    );
   }
 
   private handleArtcodeScanResult(code: string) {

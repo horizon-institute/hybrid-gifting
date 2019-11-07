@@ -694,6 +694,22 @@ export class TimelineProvider {
     return result;
   }
   /**
+   * "%%APPROOT%%/photo.jpg" -> "/path/to/app/stuff/photo.jpg"
+   * @param filePath 
+   */
+  public replaceFilePathVariablesForDisplay(filePath: string): string {
+    if (filePath.startsWith("data:")) return filePath;
+    var result: string = this.replaceFilePathVariables(filePath);
+
+    // apply any special formatting required by the WebView plugin.
+    let win: any = window;
+    if (win.Ionic != undefined && win.Ionic.WebView != undefined && win.Ionic.WebView.convertFileSrc != undefined) {
+      result = win.Ionic.WebView.convertFileSrc(result);
+    }
+
+    return result;
+  }
+  /**
    * "/path/to/app/stuff/photo.jpg" -> "%%APPROOT%%/photo.jpg"
    * @param filePath 
    */

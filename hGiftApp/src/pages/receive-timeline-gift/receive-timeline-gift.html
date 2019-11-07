@@ -8,6 +8,24 @@
 
 <ion-content padding>
 
+
+  <!-- Default content -->
+  <ng-container *ngIf="defaultContentTimelineEntries.length != 0">
+    <ion-card>
+
+      <!-- Content -->
+      <ng-container *ngFor="let contentEntry of defaultContentTimelineEntries">
+        <ion-item *ngIf="contentEntry.getMetadata('hg_entry_type') != 'link'">
+          <img *ngIf="contentEntry.getMetadata('hg_entry_type') == 'image'" class="timeline-entry-image" src="{{ timelineProvider.replaceFilePathVariablesForDisplay(contentEntry.getLocalContentURI()) }}" (tap)="openImage(contentEntry)"/>
+          <p   *ngIf="contentEntry.getMetadata('hg_entry_type') == 'text'"  class="timeline-entry-text" [style.font-size.%]="fontStyleForText(decodeBase64TextURI(contentEntry.getLocalContentURI()))" >{{ decodeBase64TextURI(contentEntry.getLocalContentURI()) }}</p>
+          <p   *ngIf="contentEntry.getMetadata('hg_entry_type') == 'url'"   class="timeline-entry-url" >{{contentEntry.getMetadata('title')}}<br><a href="#" (tap)="openUrl(decodeBase64TextURI(contentEntry.getLocalContentURI()))">{{ decodeBase64TextURI(contentEntry.getLocalContentURI()) }}</a></p>
+        </ion-item>
+      </ng-container>
+
+    </ion-card>
+  </ng-container>
+
+  <!-- User content -->
   <ng-container *ngFor="let entry of timelineEntries">
     <ion-card *ngIf="entry.getMetadata('hg_entry_type') == 'reveal'">
       <!-- Header -->
@@ -23,7 +41,7 @@
       <!-- Content -->
       <ng-container *ngFor="let contentEntry of timelineEntries">
         <ion-item *ngIf="contentEntry.getMetadata('hg_entry_type') != 'link' && contentEntry.getMetadata('hg_link_uri') == entry.getMetadata('hg_link_uri')">
-          <img *ngIf="contentEntry.getMetadata('hg_entry_type') == 'image'" class="timeline-entry-image" src="{{ timelineProvider.replaceFilePathVariables(contentEntry.getLocalContentURI()) }}" (tap)="openImage(contentEntry)"/>
+          <img *ngIf="contentEntry.getMetadata('hg_entry_type') == 'image'" class="timeline-entry-image" src="{{ timelineProvider.replaceFilePathVariablesForDisplay(contentEntry.getLocalContentURI()) }}" (tap)="openImage(contentEntry)"/>
           <p   *ngIf="contentEntry.getMetadata('hg_entry_type') == 'text'"  class="timeline-entry-text" [style.font-size.%]="fontStyleForText(decodeBase64TextURI(contentEntry.getLocalContentURI()))" >{{ decodeBase64TextURI(contentEntry.getLocalContentURI()) }}</p>
           <p   *ngIf="contentEntry.getMetadata('hg_entry_type') == 'url'"   class="timeline-entry-url" >{{contentEntry.getMetadata('title')}}<br><a href="#" (tap)="openUrl(decodeBase64TextURI(contentEntry.getLocalContentURI()))">{{ decodeBase64TextURI(contentEntry.getLocalContentURI()) }}</a></p>
         </ion-item>
@@ -32,6 +50,7 @@
     </ion-card>
   </ng-container>
 
+  <!-- Options to reveal remaining content -->
   <p style="text-align: center;" *ngIf="toRevealQRCodes+toRevealNFCTags+toRevealArtcodes > 0">Use the options below to access the hidden digital content in your gift!</p>
   
   <ion-card *ngIf="toRevealQRCodes > 0" class="limit-width" (tap)="scanQR()">
@@ -78,6 +97,7 @@
     </ion-item>
   </ion-card>
 
+  <!-- Return channel -->
   <ion-card *ngIf="toRevealQRCodes == 0 && toRevealNFCTags == 0 && toRevealArtcodes == 0 && hasWritenThakyou == false" class="limit-width">
     <button ion-item detail-none (tap)="sendThankYouNote()">
       Send thank you note

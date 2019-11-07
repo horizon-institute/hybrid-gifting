@@ -4,9 +4,6 @@ import { TimelineEntryId } from '../timeline-entry-id/timeline-entry-id';
 import { Base64 } from 'js-base64';
 
 
-/*
-This class represents a users state along a journey.
-*/
 export class TimelineEntry {
 
     private source: {};
@@ -14,7 +11,7 @@ export class TimelineEntry {
     private CRONICAL_BASE_URL = "https://timeline.chronicle.horizon.ac.uk/";
 
     private id: TimelineEntryId;
-  
+
     constructor(data: any, timeline_id = -1) {
       if (data!=null && typeof data == "object") {
         this.source = data;
@@ -31,7 +28,7 @@ export class TimelineEntry {
         this.source = {
             "status": "local",
             "id": this.id.getID(),
-            "createdAt": "",
+            "createdAt": (new Date().toISOString()),
             "mimeType": "",
             "metadata": [
                 /*{"key": "256 max length string", "value": "256 max length string"}*/
@@ -43,6 +40,10 @@ export class TimelineEntry {
 
     public getId(): TimelineEntryId {
         return this.id;
+    }
+
+    public getCreatedAt(): string {
+        return this.source["createdAt"];
     }
 
 
@@ -106,9 +107,9 @@ export class TimelineEntry {
         this.source['localContentURI'] = uri;
     }
 
-    /** 
-     * May return either 
-     * - a base64 URI (e.g. "data:text/plain;base64,aGk="), or 
+    /**
+     * May return either
+     * - a base64 URI (e.g. "data:text/plain;base64,aGk="), or
      * - a local file path (e.g. "/path/to/file.jpg")
      */
     public getLocalContentURI(): string {
@@ -163,7 +164,7 @@ export class TimelineEntry {
         entry.addMetadata(TimelineEntry.METADATA_KEY_LINK_TYPE, linkType);
         entry.addMetadata(TimelineEntry.METADATA_KEY_LINK_URI, TimelineEntry.removeHash(linkUri));
         entry.setHash(TimelineEntry.getHash(linkUri));
-        
+
         entry.setMimeType("text/plain");
         entry.setLocalURI("data:text/plain;base64," + Base64.encode(""));
 
@@ -247,7 +248,7 @@ export class TimelineEntry {
         return entry;
     }
 
-    
+
     public static createArtcodeShareEntry(timeline_id: number, hg_userId: string, linkUri: string): TimelineEntry {
         var entry = new TimelineEntry(null, timeline_id);
 

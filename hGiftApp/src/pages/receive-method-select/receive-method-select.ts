@@ -57,7 +57,9 @@ export class ReceiveMethodSelectPage {
 
 
   private readQR() {
+    console.log("Opening QR code reader...");
     this.navCtrl.push(QrCodeScannerPage, { callback: (uri:string)=>{
+      console.log("QR code reader returned '"+uri+"'.");
       this.openTimelineGift(uri, "qrcode");
     } });
   }
@@ -223,12 +225,13 @@ export class ReceiveMethodSelectPage {
 
 
   public openTimelineGift(uri: string, linkType: string) {
+    console.log("Opening timeline gift (type='"+linkType+"', link='"+uri+"').");
     ReceiveMethodSelectPage.OpenTimelineGift(
       uri, 
       linkType, 
-      this.showTaskLoadingScreen, 
-      this.setTaskLoadingScreenMessage,
-      this.hideTaskLoadingScreen,
+      ()=>{this.showTaskLoadingScreen()}, 
+      (s)=>{this.setTaskLoadingScreenMessage(s)},
+      ()=>{this.hideTaskLoadingScreen()},
       this.http,
       this.timelineProvider,
       this.navCtrl,

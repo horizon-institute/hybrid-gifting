@@ -1,0 +1,56 @@
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Create ID</ion-title>
+    <ion-buttons end>
+        <button ion-button icon-only (click)="closeModal()">
+            <ion-icon item-right name="ios-close-outline"></ion-icon>
+        </button>
+    </ion-buttons>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+
+
+  <p>Give this group of IDs a name or comment to help you remember what they are for.</p>
+  <ion-list>
+    <ion-item>
+      <ion-label stacked>Name/Comment</ion-label>
+      <ion-input type="text" [(ngModel)]="commentForIds"></ion-input>
+    </ion-item>
+  </ion-list>
+
+  <ion-list>
+    <ion-item>
+      <ion-label>
+        How many IDs whould you like to create?
+      </ion-label>
+      <ion-badge item-end color="primary">{{numberOfIdsToCreate}}</ion-badge>
+      <ion-range min="1" max="20" step="1" snaps="true" color="primary" [(ngModel)]="numberOfIdsToCreate"></ion-range>
+    </ion-item>
+  </ion-list>
+
+  <ion-list radio-group [(ngModel)]="selectedDefaultContent">
+    <ion-item style="text-align: center;">
+      Select Default Content:
+    </ion-item>
+  
+    <ion-item *ngFor="let defaultContentItem of defaultContentArray; let defaultContentIndex = index">
+      <ion-label>{{defaultContentItem['comment']}}</ion-label>
+      <ion-radio value="{{defaultContentIndex}}"></ion-radio>
+    </ion-item>
+  </ion-list>
+
+</ion-content>
+
+
+<ion-footer>
+
+  <ion-toolbar style="text-align: center;">
+    <button ion-button (click)="createIds()">Create</button>
+  </ion-toolbar>
+  
+</ion-footer>

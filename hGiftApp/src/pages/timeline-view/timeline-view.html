@@ -14,17 +14,24 @@
 
 
 <ion-content padding>
-  
+
   <ion-card *ngFor="let entry of timelineEntries">
       <ion-item>ID: TL {{ entry.getId().getTimelineId() }} E {{ entry.getId().getID() }}</ion-item>
-      <ion-item>Metadata: {{ entry.getMetadataSize() }}
+      <ion-item>{{ entry.getCreatedAt() }}</ion-item>
+      <ion-item>
+        <b>Metadata list ({{ entry.getMetadataSize() }} items):</b>
         <div *ngFor="let metadataEntry of entry.getMetadataDictionary()">
-              {{ metadataEntry['key'] }} = {{ metadataEntry['value'] }}
+          <div class="metadata-list-key">{{ metadataEntry['key'] }}</div>
+          <div class="metadata-list-value">{{ metadataEntry['value'] }}</div>
+          <div class="metadata-list-separator"></div>
         </div>
       </ion-item>
-      <ion-item>Mimetype: {{ entry.getMimeType() }}</ion-item>
+      <ion-item>
+        <b>Mimetype:</b> {{ entry.getMimeType() }}
+      </ion-item>
       <ion-item *ngIf="entry.getMimeType() == 'image/jpeg' || entry.getMimeType() == 'image/png' || entry.getMimeType() == 'image/gif'">
-        <img src="{{ entry.getLocalContentURI() }}"/>
+        <!--<img src="{{ entry.getLocalContentURI() }}"/>-->
+        <img *ngIf="entry.getMetadata('hg_entry_type') == 'image'" class="timeline-entry-image" src="{{ timelineProvider.replaceFilePathVariablesForDisplay(entry.getLocalContentURI()) }}"/>
       </ion-item>
       <ion-item *ngIf="entry.getMimeType() == 'text/plain'">
         {{ decodeBase64TextURI(entry.getLocalContentURI()) }}
@@ -33,3 +40,16 @@
 
 
 </ion-content>
+<!--
+<div class="present-wrapper">
+  <div class="scene">
+    <div class="box">
+      <div class="box__face box__face--front"></div>
+      <div class="box__face box__face--back"></div>
+      <div class="box__face box__face--right"></div>
+      <div class="box__face box__face--left"></div>
+      <div class="box__face box__face--top"></div>
+    </div>
+  </div>
+</div>
+-->

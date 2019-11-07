@@ -18,6 +18,11 @@ import { ReceiveTimelineGiftPage } from '../receive-timeline-gift/receive-timeli
 import { GlobalUtils } from '../../objects/global-utils/global-utils';
 import { HybridHttpProvider } from '../../providers/hybrid-http/hybrid-http';
 
+import { GiftNamesProvider } from '../../providers/gift-names/gift-names';
+import { WebVendorHomePage } from '../web-vendor-home/web-vendor-home';
+
+declare var cordova;
+
 @Component({
   selector: 'page-home',
   templateUrl: 'home.html'
@@ -27,19 +32,24 @@ export class HomePage {
   private sent: Timeline[] = [];
   private received: Timeline[] = [];
 
+  private cachedGiftNamesMap = {};
+
+  private autoOpenWebGift = true;
+
   constructor(
     public navCtrl: NavController,
     private timelineProvider: TimelineProvider,
     public loadingCtrl: LoadingController,
     private http: HybridHttpProvider,
-    private zone: NgZone
+    private zone: NgZone,
+    private giftNamesProvider: GiftNamesProvider
   ) {
   }
 
   public ionViewDidLoad() {
-    //Runs when the page has loaded. This event only happens once per page 
-    // being created. If a page leaves but is cached, then this event will 
-    // not fire again on a subsequent viewing. The ionViewDidLoad event is 
+    //Runs when the page has loaded. This event only happens once per page
+    // being created. If a page leaves but is cached, then this event will
+    // not fire again on a subsequent viewing. The ionViewDidLoad event is
     // good place to put your setup code for the page.
     this.timelineProvider.getSentGifts().then((value)=>{ this.sent = value; });
     this.timelineProvider.getReceivedGifts().then((value)=>{ this.received = value; });
@@ -50,8 +60,19 @@ export class HomePage {
         this.zone.run(()=>{
           this.webGiftIsAvailble = true;
         });
+
+        if (this.autoOpenWebGift) {
+          this.loadWebGift();
+        }
       }
     }
+
+    setTimeout(()=>{
+      try {
+        cordova.plugins.Keyboard.hideKeyboardAccessoryBar(false);
+      } catch (err) {}
+    }, 2000);
+
 
   }
 
@@ -63,9 +84,9 @@ export class HomePage {
       let url = window.location.toString();
       if (url.lastIndexOf("?") >= 0 && url.lastIndexOf("hgid=")) {
         ReceiveMethodSelectPage.OpenTimelineGift(
-          url, 
-          "", 
-          ()=>{if (this.webLoadingScreen==null) this.webLoadingScreen = this.loadingCtrl.create({"content":"Please wait..."}); this.webLoadingScreen.present();}, 
+          url,
+          "",
+          ()=>{if (this.webLoadingScreen==null) this.webLoadingScreen = this.loadingCtrl.create({"content":"Please wait..."}); this.webLoadingScreen.present();},
           (msg:string)=>{this.zone.run(()=>{ this.webLoadingScreen.setContent(msg); });},
           ()=>{this.webLoadingScreen.dismiss()},
           this.http,
@@ -76,12 +97,18 @@ export class HomePage {
       }
     }
   }
-  public ionViewWillEnter() { 
+  public ionViewWillEnter() {
     // Runs when the page is about to enter and become the active page.
   }
   public ionViewDidEnter() {
-    // Runs when the page has fully entered and is now the active page. This 
+    // Runs when the page has fully entered and is now the active page. This
     // event will fire, whether it was the first load or a cached page.
+
+    this.giftNamesProvider.getGiftNameMap().then((giftNameMap)=>{
+      this.zone.run(()=>{
+        this.cachedGiftNamesMap = giftNameMap;
+      });
+    });
   }
   public ionViewWillLeave() {
     // Runs when the page is about to leave and no longer be the active page.
@@ -168,7 +195,7 @@ export class HomePage {
   }
 
   private debugRawTimelineView(timeline: Timeline) {
-    this.navCtrl.push(TimelineViewPage);
+    this.navCtrl.push(TimelineViewPage, { "timeline": timeline });
   }
 
   private debugDeleteFromSentList(timeline: Timeline) {
@@ -222,6 +249,9 @@ export class HomePage {
   }
 
 
-  
+  private openVendorHome() {
+    this.navCtrl.push(WebVendorHomePage);
+  }
+
 
 }
